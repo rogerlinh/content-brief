@@ -1,0 +1,8 @@
+# Content Brief Generator - Dependencies
+# ──────────────────────────────────────
+# Core: Python standard library (csv, os, re, logging, argparse, time)
+# SERP Analysis (chạy với --serp flag):
+playwright>=1.40.0
+# Query Network Analysis (chạy với --network flag):
+openai>=1.12.0
+requests>=2.31.0
