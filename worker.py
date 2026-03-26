@@ -126,7 +126,7 @@ def process_single_keyword(kw, idx, total, config_opts, output_dir, glog, csv_lo
         try:
             if glog and glog.is_connected:
                 print(f"➡️ [GSHEET] Thử ghi lỗi vào Sheet cho '{kw}'...")
-                glog.log_error(-1, f"[{kw}] {error_msg[:150]}")
+                glog.log_error(csv_row if csv_row >= 0 else 1, error_msg)
                 print("✅ [GSHEET] Đã ghi lỗi lên Sheet.")
         except Exception as ge:
             print(f"⚠️ [GSHEET] Lỗi Sync Google Sheet (Bỏ qua): {ge}")

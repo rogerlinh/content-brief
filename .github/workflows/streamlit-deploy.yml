@@ -1,0 +1,50 @@
+name: Deploy to Streamlit Cloud
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Verify critical files exist
+        run: |
+          echo "=== Checking critical files ==="
+          ls -la app.py
+          ls -la requirements.txt
+          ls -la .streamlit/config.toml || echo "No config.toml"
+          echo "=== Modules ==="
+          ls modules/
+
+      - name: Run syntax check
+        run: |
+          python -m py_compile app.py
+          echo "Syntax check passed"
+
+      - name: Run unit tests
+        run: |
+          python run_test.py
+        continue-on-error: false

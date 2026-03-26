@@ -39,6 +39,7 @@ ENV/
 # Environment & secrets
 .env
 .env.local
+.streamlit/secrets.toml
 *.pem
 *.key
 

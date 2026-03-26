@@ -67,7 +67,7 @@ def inject_semantic_prompt(base_prompt: str, agent_name: str = "") -> str:
     knowledge = get_semantic_skills()
 
     try:
-        from modules.knowledge_loader import load_kb, load_kb_for_agent
+        from modules.knowledge_loader import load_kb, load_kb_section, load_kb_for_agent
 
         if agent_name:
             # Agent-specific KB sections (reduced size)
@@ -118,7 +118,8 @@ def inject_source_context(base_prompt: str, project=None) -> str:
     try:
         # Gọi trực tiếp method trên object, không cần tạo lại ProjectManager
         from modules.project_manager import ProjectManager
-        source_ctx = ProjectManager.to_source_context_string(None, project)
+        pm = ProjectManager()
+        source_ctx = pm.to_source_context_string(project)
         if source_ctx.strip():
             logger.info("  [SEMANTIC] Đã inject Source Context của project '%s'", project.brand_name)
             return source_ctx + "\n\n" + base_prompt

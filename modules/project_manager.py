@@ -43,6 +43,7 @@ class Project:
     email: str = ""                  # Email
     address: str = ""                # Địa chỉ trụ sở
     warehouse: str = ""              # Kho / Chi nhánh
+    topical_map_csv: str = ""         # Đường dẫn topics.csv riêng của project
     created_at: str = ""
     updated_at: str = ""
     is_active: bool = False          # Project đang được chọn
@@ -70,6 +71,7 @@ class ProjectManager:
             email TEXT DEFAULT '',
             address TEXT DEFAULT '',
             warehouse TEXT DEFAULT '',
+            topical_map_csv TEXT DEFAULT '',
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
             is_active INTEGER DEFAULT 0
@@ -85,7 +87,14 @@ class ProjectManager:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute(self.CREATE_TABLE_SQL)
-                conn.commit()
+                # Migration: thêm cột topical_map_csv nếu chưa có
+                try:
+                    conn.execute(
+                        "ALTER TABLE projects ADD COLUMN topical_map_csv TEXT DEFAULT ''"
+                    )
+                    conn.commit()
+                except sqlite3.OperationalError:
+                    pass  # Cột đã tồn tại
             logger.debug("[PM] SQLite DB initialized at %s", self.db_path)
         except Exception as e:
             logger.error("[PM] Lỗi khởi tạo DB: %s", e)
@@ -110,9 +119,10 @@ class ProjectManager:
             email=row[14] or "",
             address=row[15] or "",
             warehouse=row[16] or "",
-            created_at=row[17] or "",
-            updated_at=row[18] or "",
-            is_active=bool(row[19]),
+            topical_map_csv=row[17] or "",
+            created_at=row[18] or "",
+            updated_at=row[19] or "",
+            is_active=bool(row[20]),
         )
 
     def create(self, data: dict) -> Optional[Project]:
@@ -126,8 +136,9 @@ class ProjectManager:
                         name, brand_name, domain, company_full_name, industry,
                         main_products, usp, target_customers, competitor_brands,
                         tone, technical_standards, geo_keywords, hotline, email,
-                        address, warehouse, created_at, updated_at, is_active
-                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0)
+                        address, warehouse, topical_map_csv,
+                        created_at, updated_at, is_active
+                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0)
                     """,
                     (
                         data.get("name", ""),
@@ -146,6 +157,7 @@ class ProjectManager:
                         data.get("email", ""),
                         data.get("address", ""),
                         data.get("warehouse", ""),
+                        data.get("topical_map_csv", ""),
                         now, now,
                     ),
                 )
@@ -217,7 +229,7 @@ class ProjectManager:
                         industry=?, main_products=?, usp=?, target_customers=?,
                         competitor_brands=?, tone=?, technical_standards=?,
                         geo_keywords=?, hotline=?, email=?, address=?,
-                        warehouse=?, updated_at=?
+                        warehouse=?, topical_map_csv=?, updated_at=?
                     WHERE id=?
                     """,
                     (
@@ -237,6 +249,7 @@ class ProjectManager:
                         data.get("email", ""),
                         data.get("address", ""),
                         data.get("warehouse", ""),
+                        data.get("topical_map_csv", ""),
                         now,
                         project_id,
                     ),
@@ -257,6 +270,21 @@ class ProjectManager:
         except Exception as e:
             logger.error("[PM] Lỗi delete: %s", e)
 
+    def _normalize_phone(self, phone: str) -> str:
+        """Chuẩn hóa số điện thoại Việt Nam: +84 → 0, loại bỏ khoảng trắng."""
+        import re
+        if not phone:
+            return ""
+        p = phone.strip()
+        # +84xxx → 0xxx
+        p = re.sub(r'^\+84', '0', p)
+        # Loại bỏ khoảng trắng, dấu ngoặc thừa
+        p = re.sub(r'[\s\(\)\.-]', '', p)
+        # Đảm bảo bắt đầu bằng 0
+        if not p.startswith('0') and len(p) >= 9:
+            p = '0' + p
+        return p
+
     def to_source_context_string(self, project: "Project") -> str:
         """
         Convert Project thành chuỗi Source Context để inject vào LLM prompt.
@@ -271,7 +299,7 @@ class ProjectManager:
             else "KHÔNG đặt tên brand đối thủ làm H2 độc lập trong [MAIN]"
         )
 
-        nap_lines = [f"📞 Hotline/Zalo: {project.hotline}" if project.hotline else ""]
+        nap_lines = [f"📞 Hotline/Zalo: {self._normalize_phone(project.hotline)}" if project.hotline else ""]
         if project.email:
             nap_lines.append(f"✉️  Email: {project.email}")
         if project.address:

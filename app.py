@@ -12,6 +12,11 @@ try:
 except ImportError:
     pass
 
+# ── Phase 37: Streamlit Cloud compatibility ──
+# Detect cloud environment: Streamlit Cloud sets SHARE_URL env var
+IS_CLOUD = bool(os.environ.get("STREAMLIT_SHARING_MODE") or os.environ.get("STREAMLIT_CLOUD"))
+IS_LOCAL = not IS_CLOUD
+
 from modules.gsheet_logger import GSheetLogger
 
 st.set_page_config(page_title="Content Brief Generator", page_icon="📝", layout="wide")
@@ -452,24 +457,50 @@ with col_action:
             
             with open("job_queue.json", "w", encoding="utf-8") as f:
                 json.dump(job_data, f, ensure_ascii=False, indent=2)
-                
-            # Kích hoạt worker ngầm — ghi stderr ra file để bắt crash
-            import subprocess
-            error_file = open("worker_error.log", "w", encoding="utf-8")
-            subprocess.Popen(
-                [sys.executable, "-u", "worker.py"],  # -u = unbuffered
-                stderr=error_file,
-                stdout=error_file,
-            )
-            
-            with open("worker_lock.txt", "w", encoding="utf-8") as f:
-                f.write("STARTING")
-            
-            st.success("✅ Đã khởi chạy tiến trình ngầm! Đang tải dữ liệu...")
-            time.sleep(1)
-            st.rerun()
+
+            if IS_CLOUD:
+                # Streamlit Cloud: chạy inline trong Streamlit (không dùng subprocess/worker)
+                st.warning("☁️ Streamlit Cloud: Chạy pipeline trực tiếp (từng keyword). Với batch lớn, dùng local thay thế.")
+                # Phase 37: Inline pipeline for cloud — khởi tạo session state
+                if "batch_results" not in st.session_state:
+                    st.session_state.batch_results = []
+                if "batch_running" not in st.session_state:
+                    st.session_state.batch_running = False
+                if "batch_keywords" not in st.session_state:
+                    st.session_state.batch_keywords = keywords
+                if "batch_idx" not in st.session_state:
+                    st.session_state.batch_idx = 0
+                st.session_state.batch_running = True
+                st.session_state.batch_keywords = keywords
+                st.session_state.batch_idx = 0
+                st.session_state.batch_results = []
+                st.session_state.batch_config = job_data["config"]
+                st.session_state.batch_project_id = job_data["config"].get("project_id")
+                st.session_state.batch_sheet_url = sheet_url
+                st.success("✅ Đã khởi tạo batch! Keyword sẽ chạy khi bạn reload trang.")
+                st.info("💡 Mẹo: Với batch >5 keywords, dùng **local** thay vì cloud.")
+                st.rerun()
+            else:
+                # Local: dùng worker ngầm bình thường
+                import subprocess
+                error_file = open("worker_error.log", "w", encoding="utf-8")
+                subprocess.Popen(
+                    [sys.executable, "-u", "worker.py"],  # -u = unbuffered
+                    stderr=error_file,
+                    stdout=error_file,
+                )
+
+                with open("worker_lock.txt", "w", encoding="utf-8") as f:
+                    f.write("STARTING")
+
+                st.success("✅ Đã khởi chạy tiến trình ngầm! Đang tải dữ liệu...")
+                time.sleep(1)
+                st.rerun()
     else:
-        st.button("🔄 Tiến trình đang chạy ngầm...", type="secondary", disabled=True, use_container_width=True)
+        if IS_CLOUD:
+            st.info("☁️ Cloud mode: Batch đã khởi tạo. Reload trang để chạy tiếp.")
+        else:
+            st.button("🔄 Tiến trình đang chạy ngầm...", type="secondary", disabled=True, use_container_width=True)
         if st.button("🛑 Dừng Worker (Force Kill)", type="primary"):
             # Đọc PID từ lock file và kill (chỉ mượn os.remove tạm thời cho mock)
             try:
@@ -487,6 +518,53 @@ with col_action:
 
 st.markdown("---")
 st.subheader("📊 Data Monitor (Auto-refresh: 3s)")
+
+# ── Phase 37: Inline Batch Processor for Streamlit Cloud ──
+if IS_CLOUD and st.session_state.get("batch_running"):
+    batch_keywords = st.session_state.batch_keywords
+    batch_idx = st.session_state.batch_idx
+    batch_results = st.session_state.batch_results
+    batch_project_id = st.session_state.batch_project_id
+    batch_config = st.session_state.batch_config
+
+    if batch_idx < len(batch_keywords):
+        kw = batch_keywords[batch_idx]
+        progress_bar.progress((batch_idx + 1) / len(batch_keywords))
+        log_container.info(f"☁️ [{batch_idx+1}/{len(batch_keywords)}] Cloud: {kw}")
+
+        try:
+            from modules.project_manager import ProjectManager
+            pm = ProjectManager()
+            project = pm.get_by_id(batch_project_id) if batch_project_id else None
+        except Exception:
+            project = None
+
+        try:
+            from main_generator import generate_content_brief
+            result = generate_content_brief(
+                topic=kw,
+                enable_serp=batch_config.get("enable_serp", True),
+                enable_network=batch_config.get("enable_network", False),
+                enable_context=batch_config.get("enable_context", False),
+                enable_linking=batch_config.get("enable_linking", True),
+                project=project,
+            )
+            batch_results.append({"keyword": kw, "status": "done", "file": result or "N/A"})
+            log_container.success(f"  ✅ Done: {kw}")
+        except Exception as cloud_err:
+            batch_results.append({"keyword": kw, "status": f"error: {cloud_err}", "file": ""})
+            log_container.error(f"  ❌ Error: {kw} — {cloud_err}")
+
+        st.session_state.batch_idx = batch_idx + 1
+        st.session_state.batch_results = batch_results
+        st.rerun()
+    else:
+        # Batch complete
+        st.session_state.batch_running = False
+        results_df = pd.DataFrame(batch_results)
+        result_table.dataframe(results_df, use_container_width=True)
+        st.success(f"✅ Batch hoàn tất! {len(batch_results)} keywords đã xử lý.")
+        progress_bar.progress(1.0)
 
 # Load database hiển thị
 df_db = pd.DataFrame()

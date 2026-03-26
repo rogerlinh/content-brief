@@ -204,6 +204,7 @@ def build_internal_links(
     headings: List[Dict] = None,
     niche: str = "general",
     keyword_clusters: List[str] = None,
+    topical_map_csv: str = "",  # Phase 37: project-specific topical map
 ) -> Optional[Dict]:
     """
     Phase 10: Intelligent Linking Architecture (V9).
@@ -217,12 +218,13 @@ def build_internal_links(
         headings: Danh sách heading đã enriched.
         niche: Lĩnh vực (food_health, tech_gadget...).
         keyword_clusters: Danh sách các topic semantic phụ trợ.
+        topical_map_csv: Đường dẫn project-specific topics.csv.
 
     Returns:
         Dict: {"role", "cluster", "outbound_nodes", "inbound_topics", "tree_view"}
     """
-    # ── Ưu tiên 1: Topical Map CSV (V9 Fix) ──
-    csv_result = _try_topics_csv(current_topic)
+    # ── Ưu tiên 1: Topical Map CSV (V9 Fix, Phase 37 project-aware) ──
+    csv_result = _try_topics_csv(current_topic, topical_map_csv)
     if csv_result and csv_result.get("outbound_nodes"):
         logger.info("  [LINKING] Loaded internal links directly from topics.csv topical map")
         return csv_result
@@ -363,7 +365,10 @@ def _build_from_headings(
     inbound_clean = [
         t for t in inbound_topics
         if t["topic"].lower() not in outbound_set
-        or True  # Inbound là gợi ý cho bài KHÁC link VỀ bài này, nên OK
+        # Inbound là gợi ý cho bài KHÁC link VỀ bài này
+        # Chỉ lọc: loại bỏ topics nằm trong outbound_set (tránh circular)
+        and t["topic"].lower() != current_topic.lower()
+        # Giữ lại inbound topics khác bài hiện tại
     ]
 
     # ── Tree View ──
@@ -405,14 +410,26 @@ def _detect_cluster_name(topic: str) -> str:
 #  CSV TOPICAL MAP (Legacy support)
 # ══════════════════════════════════════════════
 
-def _try_topics_csv(current_topic: str) -> Optional[Dict]:
+def _try_topics_csv(current_topic: str, project_topical_map_csv: str = "") -> Optional[Dict]:
     """
     Đọc file topics.csv (Cột 1: Keyword) để lấy danh sách bài viết thực tế trong Topical Map.
     Chọn ra 5 bài viết liên quan nhất làm internal link.
+
+    Priority: project.topical_map_csv > global topics.csv > global database_v2.csv
     """
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    csv_path = os.path.join(base_dir, "topics.csv")
-    db_path = os.path.join(base_dir, "database_v2.csv")
+
+    # Ưu tiên: project-specific topical_map_csv
+    file_to_read = None
+    if project_topical_map_csv and os.path.exists(project_topical_map_csv):
+        file_to_read = project_topical_map_csv
+    else:
+        csv_path = os.path.join(base_dir, "topics.csv")
+        db_path = os.path.join(base_dir, "database_v2.csv")
+        if os.path.exists(csv_path):
+            file_to_read = csv_path
+        elif os.path.exists(db_path):
+            file_to_read = db_path
     
     # Ưu tiên đọc topics.csv trước, nếu không thử database_v2.csv
     file_to_read = None

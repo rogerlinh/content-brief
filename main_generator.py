@@ -57,7 +57,8 @@ def _format_context_vectors_for_log(context_data) -> str:
     if isinstance(context_data, str):
         return context_data[:500]
     if isinstance(context_data, dict):
-        guidelines = context_data.get("guidelines", [])
+        # build_prompt_context returns {"context_vectors": [...], "contextual_structure": [...]}
+        guidelines = context_data.get("contextual_structure", context_data.get("guidelines", []))
         if guidelines and isinstance(guidelines, list):
             return " | ".join(str(g) for g in guidelines[:5])
         return str(context_data)[:500]
@@ -562,7 +563,9 @@ def run_pipeline(
                 topic = topic_data["topic"]
                 future = executor.submit(
                     _process_single_topic,
-                    topic, enable_serp, enable_network, enable_context, enable_linking, output_dir, total_steps
+                    topic, enable_serp, enable_network, enable_context, enable_linking,
+                    "auto", output_dir, total_steps,
+                    glog, csv_log, -1, None,
                 )
                 future_to_topic[future] = (i, topic)
 
@@ -585,7 +588,9 @@ def run_pipeline(
 
             try:
                 filepath = _process_single_topic(
-                    topic, enable_serp, enable_network, enable_context, enable_linking, output_dir, total_steps
+                    topic, enable_serp, enable_network, enable_context, enable_linking,
+                    "auto", output_dir, total_steps,
+                    None, None, -1, None,
                 )
                 if filepath:
                     generated_files.append(filepath)

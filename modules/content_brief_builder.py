@@ -8,6 +8,17 @@ Phase 9: Semantic Polish & Contextualization
 - Dynamic E-E-A-T (niche-based inline instructions)
 """
 
+import unicodedata
+
+
+def _remove_diacritics(text: str) -> str:
+    """Strip Vietnamese diacritics: 'phái sinh' -> 'phai sinh'."""
+    nfkd = unicodedata.normalize('NFKD', text)
+    return ''.join(c for c in nfkd if not unicodedata.combining(c))
+
+
+
+
 import logging
 import re
 from typing import Dict, List, Optional
@@ -56,17 +67,45 @@ NICHE_KEYWORDS = {
         "thuế", "bảo hiểm", "hợp đồng", "luật", "pháp lý",
         "kinh doanh", "doanh nghiệp", "tài chính", "kế toán",
     ],
+    "commodity_trading": [
+        "hàng hóa", "phái sinh", "quỹ", "commodity", "futures",
+        "đầu tư", "tài chính", "giao dịch", "thị trường",
+        "chứng khoán", "vốn", "lợi nhuận", "rủi ro",
+        "ngân hàng", "bảo hiểm", "quản lý", "quy định",
+        "đăng ký", "giấy phép", "chính sách", "công ty",
+    ],
 }
 
 
-def detect_niche(keyword: str) -> str:
+def detect_niche(keyword: str, project_industry: str = "") -> str:
     """
-    Phát hiện lĩnh vực (niche) từ keyword chính.
+    Phát hiện lĩnh vực (niche) từ keyword hoặc project.industry.
 
+    Priority: project.industry > keyword-based detection.
     Returns:
         Một trong: "food_health", "tech_gadget", "construction_material",
-                   "finance_law", "general"
+                   "finance_law", "commodity_trading", "general"
     """
+    # Priority 1: project.industry mapping (normalize diacritics for reliable matching)
+    if project_industry:
+        ind = _remove_diacritics(project_industry.lower())
+        if any(k in ind for k in ["commodity", "phai sinh", "hang hoa phai sinh",
+                                   "trading", "quy", "futures"]):
+            return "commodity_trading"
+        if any(k in ind for k in ["tai chinh", "chung khoan", "bao hiem",
+                                   "dau tu", "luat", "phap ly", "ngan hang"]):
+            return "finance_law"
+        if any(k in ind for k in ["thep", "ton", "xi mang", "be tong",
+                                   "vat lieu xay dung", "xay dung"]):
+            return "construction_material"
+        if any(k in ind for k in ["cong nghe", "tech", "dien tu", "software",
+                                   "laptop", "dien thoai", "gadget"]):
+            return "tech_gadget"
+        if any(k in ind for k in ["thuc pham", "dinh duong", "suc khoe",
+                                   "y te", "thuoc", "vitamin"]):
+            return "food_health"
+
+    # Priority 2: keyword-based detection
     kw_lower = keyword.lower()
     scores = {}
     for niche, patterns in NICHE_KEYWORDS.items():
@@ -545,6 +584,7 @@ def _get_min_h2_for_intent(intent: str) -> int:
     minimums = {
         "commercial": 5,
         "informational": 4,
+        "how-to": 4,
         "transactional": 3,
         "navigational": 2,
     }
@@ -641,7 +681,7 @@ def _agent_synthesize_raw_outline(
             "Nhiệm vụ: Tổng hợp dữ liệu đối thủ (PAA, Gaps, Headings, N-grams) thành DÀN Ý (OUTLINE) hoàn chỉnh.\n</role>\n\n"
 
             "<rules>\n"
-            "═══ 6 QUY TẮC CỐT LÕI BẮT BUỘC ═══\n"
+            "═══ 8 QUY TẮC CỐT LÕI BẮT BUỘC ═══\n"
             "1. CONTEXTUAL FLOW: Từ Định nghĩa → Thuộc tính → Ứng dụng → FAQ. "
             "H2 sau phải nối ngữ cảnh với H2 trước.\n"
             "2. CONTEXTUAL HIERARCHY (BẮT BUỘC): Mỗi H2 phải có ≥1 H3 con (children). "
@@ -653,6 +693,21 @@ def _agent_synthesize_raw_outline(
             "5. MAIN/SUPP SPLIT: Thêm prefix [MAIN] hoặc [SUPP]. "
             "SUPP = FAQ, tips, antonym ending (20-35% tổng H2).\n"
             "6. PROMINENCE GATE: Content Gaps chỉ đưa vào nếu có Prominence/Popularity.\n"
+            "7. **H2 SPECIFICITY — LẤY ATTRIBUTE TỪ EAV TABLE**:\n"
+            "   Mỗi H2 [MAIN] phải chứa ÍT NHẤT 1 Attribute CỤ THỂ từ EAV Table đã cung cấp.\n"
+            "   **Cách suy luận Attribute cụ thể**:\n"
+            "   Bước 1: XEM bảng EAV Table (cột Attribute = tập hợp các thuộc tính cần phủ).\n"
+            "   Bước 2: VỚI MỖI H2, CHỌN 1-2 Attribute phù hợp nhất với nội dung H2 đó.\n"
+            "   Bước 3: GHÉP Attribute vào tên H2 theo pattern: '[Entity] + [Attribute cụ thể]'.\n"
+            "   **Pattern đúng**: '[Entity]: [Attribute 1], [Attribute 2]' HOẶC '[Attribute]: [Chi tiết cụ thể]'.\n"
+            "   **Cấm tuyệt đối**: Không được có H2 nào chỉ có Entity mà không có Attribute.\n"
+            "8. **REJECT HEADING NẾU KHÔNG CÓ ATTRIBUTE**:\n"
+            "   ❌ 'Các đặc điểm cấu tạo nổi bật nhất' (không rõ Attribute là gì)\n"
+            "   ❌ 'Ứng dụng thực tiễn trong đời sống và xây dựng' (quá rộng, không có Attribute)\n"
+            "   ❌ 'Những lưu ý quan trọng khi chọn mua' (không rõ lưu ý gì)\n"
+            "   ✅ '{Entity}: {Attribute cụ thể 1}, {Attribute cụ thể 2}'\n"
+            "   ✅ '{Attribute cụ thể}: {Chi tiết bổ sung cụ thể}'\n"
+            "   ✅ '{Mã/Tiêu chuẩn kỹ thuật}: {Thông số cụ thể}'\n"
             "</rules>\n\n"
         )
 
@@ -666,11 +721,11 @@ def _agent_synthesize_raw_outline(
             base_system_instruction += (
                 "═══ QUY TẮC INFORMATIONAL INTENT ═══\n"
                 "Người dùng đang tìm hiểu, nghiên cứu → Tối ưu blog, guide, FAQ.\n"
-                "≥4 H2 bắt buộc. Contextual Flow chuẩn:\n"
-                "  H2-1: [MAIN] Định nghĩa cốt lõi (Entity là gì?)\n"
-                "  H2-2: [MAIN] Đặc điểm / Phân loại / Cấu tạo\n"
-                "  H2-3: [MAIN] Ứng dụng / Cách sử dụng / Lợi ích-Tác hại\n"
-                "  H2-4+: [MAIN/SUPP] Mở rộng ngữ cảnh (Thuộc tính, Tiêu chuẩn, Lịch sử...)\n"
+                "≥4 H2 bắt buộc. Mỗi H2 phải chứa Attribute từ EAV Table.\n"
+                "  H2-1: [MAIN] {Entity}: {Attribute 1}, {Attribute 2} (Định nghĩa + 2 thuộc tính cốt lõi)\n"
+                "  H2-2: [MAIN] {Attribute 3}: {Chi tiết cụ thể 1}, {Chi tiết cụ thể 2} (Phân loại/Tiêu chuẩn)\n"
+                "  H2-3: [MAIN] {Attribute 4}: {Chi tiết cụ thể} (Ứng dụng/Lợi ích/Tác hại)\n"
+                "  H2-4+: [MAIN/SUPP] {Attribute còn lại}: {Chi tiết bổ sung} (Mở rộng)\n"
                 "  Cuối: [SUPP] FAQ — Câu hỏi thường gặp\n"
                 "PHONG CÁCH: Giáo dục, giải thích, trung lập. Không bán hàng.\n\n"
             )
@@ -740,16 +795,23 @@ def _agent_synthesize_raw_outline(
             "<examples>\n"
             "═══ OUTPUT FORMAT: NESTED JSON ARRAY ═══\n"
             "Dưới đây là CẤU TRÚC CHUẨN MỰC của JSON output. H2 luôn chứa H3 con qua trường 'children'.\n"
+            "QUAN TRỌNG: MỖI H2 PHẢI CHỨA EAV ATTRIBUTE CỤ THỂ.\n"
             "[\n"
-            '  {"level":"H2","text":"[MAIN] Tại sao {entity} quan trọng trong xây dựng?","children":[\n'
-            '    {"level":"H3","text":"Đặc điểm chính nổi bật của {entity}"},\n'
-            '    {"level":"H3","text":"Sự khác biệt giữa {entity} với các dạng truyền thống"}\n'
+            '  {"level":"H2","text":"[MAIN] {Entity}: {Attribute 1}, {Attribute 2}","children":[\n'
+            '    {"level":"H3","text":"{Entity}: {Attribute cụ thể 1}?"},\n'
+            '    {"level":"H3","text":"{Attribute 1}: {Chi tiết kỹ thuật cụ thể}"}\n'
             "  ]},\n"
-            '  {"level":"H2","text":"[MAIN] Tiêu chuẩn đánh giá chất lượng phổ biến","children":[\n'
-            '    {"level":"H3","text":"Định lượng vật lý lõi"}\n'
+            '  {"level":"H2","text":"[MAIN] {Attribute 3}: {Chi tiết cụ thể 1}, {Chi tiết cụ thể 2}","children":[\n'
+            '    {"level":"H3","text":"{Chi tiết 1}: {Đặc tính vật lý}"},\n'
+            '    {"level":"H3","text":"{Chi tiết 2}: {Đơn vị đo, thông số kỹ thuật}"}\n'
+            "  ]},\n"
+            '  {"level":"H2","text":"[MAIN] {Attribute 4}: {Ứng dụng cụ thể}","children":[\n'
+            '    {"level":"H3","text":"{Lợi ích 1}: {Mô tả định lượng}"},\n'
+            '    {"level":"H3","text":"{Lợi ích 2}: {Mô tả định lượng}"}\n'
             "  ]},\n"
             '  {"level":"H2","text":"[SUPP] FAQ Câu hỏi thường gặp","children":[]}\n'
             "]\n"
+            "NOTE: Mỗi H2 phải chứa Attribute từ EAV Table. Áp dụng tương tự cho mọi chủ đề.\n"
             "</examples>\n\n"
 
             "<constraints>\n"
@@ -1475,6 +1537,32 @@ NICHE_EEAT = {
             "⚖️ CASE STUDY: Ví dụ thực tế."
         ),
     },
+    "commodity_trading": {
+        "experience": (
+            "Chia sẻ kinh nghiệm thực tế khi tham gia thị trường hàng hóa phái sinh. "
+            "Mô tả quy trình mở tài khoản, nạp/rút tiền, đặt lệnh."
+        ),
+        "expertise": (
+            "Trích dẫn văn bản pháp luật cụ thể: Thông tư 203/2014/TT-BTC, "
+            "Nghị định 158/2006/NĐ-CP, Quy chế của Sở Giao dịch hàng hóa. "
+            "Đưa biểu phí, mức ký quỹ, tỷ lệ margin cụ thể."
+        ),
+        "authority": (
+            "Liên kết đến Ủy ban Chứng khoán Nhà nước (SSC), "
+            "Sở Giao dịch Chứng khoán Việt Nam (VNX), "
+            "Bộ Tài chính, và các công ty chứng khoán được cấp phép."
+        ),
+        "trust": (
+            "Cập nhật danh sách công ty được cấp phép mới nhất. "
+            "Ghi rõ mã số giấy phép. "
+            "Thêm disclaimer pháp lý: 'Đầu tư có rủi ro, hãy tìm hiểu kỹ trước khi tham gia'."
+        ),
+        "inline_per_h2": (
+            "📜 QUY ĐỊNH: Trích dẫn văn bản pháp luật cụ thể. "
+            "📊 SỐ LIỆU: Biểu phí, mức ký quỹ, tỷ lệ margin. "
+            "⚠️ DISCLAIMER: Cảnh báo rủi ro bắt buộc."
+        ),
+    },
     "general": {
         "experience": (
             "Thêm trải nghiệm thực tế cá nhân. "
@@ -1534,9 +1622,10 @@ def build_brief(
     else:
         intent = topic_intent
 
-    # ── Phase 9: Detect Niche ──
-    niche = detect_niche(topic)
-    logger.info("  [NICHE] Detected: '%s' cho topic '%s'", niche, topic)
+    # ── Phase 9: Detect Niche (project.industry priority) ──
+    proj_industry = project.industry if project else ""
+    niche = detect_niche(topic, proj_industry)
+    logger.info("  [NICHE] Detected: '%s' cho topic '%s' (project.industry='%s')", niche, topic, proj_industry)
 
     # ── Phase 9: Heading Enrichment → Phase 19: Comprehensive Outline Synthesis ──
     raw_headings = analysis["heading_structure"]
@@ -1634,6 +1723,7 @@ def build_brief(
             keyword_clusters=keyword_clusters_raw,
             current_topic=topic,
             enriched_headings=enriched_headings,
+            topical_map_csv=project.topical_map_csv if project else "",
         ),
         "eeat_checklist": _generate_eeat_checklist(entity, niche),
         "methodology_prompt": methodology_prompt,
@@ -2110,9 +2200,9 @@ def _generate_linking_suggestions(
     keyword_clusters: list = None,
     current_topic: str = "",
     enriched_headings: list = None,
+    topical_map_csv: str = "",  # Phase 37: project-specific topical map
 ) -> list:
     """Tạo gợi ý internal linking từ keyword clusters hoặc related topics."""
-    
     # Sử dụng module internal_linking.py có cluster-based linking (V5.3)
     try:
         from modules.internal_linking import build_internal_links
@@ -2120,6 +2210,7 @@ def _generate_linking_suggestions(
             current_topic=current_topic,
             headings=enriched_headings or [],
             keyword_clusters=keyword_clusters,
+            topical_map_csv=topical_map_csv,
         )
         if result and result.get("outbound_nodes"):
             return result

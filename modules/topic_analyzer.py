@@ -87,9 +87,15 @@ def _classify_intent(topic: str) -> str:
     Priority scoring: transactional > commercial > navigational > informational.
 
     Returns:
-        Một trong: "informational", "commercial", "transactional", "navigational"
+        Một trong: "informational", "commercial", "transactional", "navigational", "vs"
     """
     topic_lower = topic.lower()
+
+    # 1. SO SÁNH / VS — kiểm tra TRƯỚC, không qua scoring
+    # (các từ này nằm trong commercial keywords nên sẽ sai nếu để scoring xử lý)
+    VS_INDICATORS = [" vs ", "so sánh", "khác nhau", "khác gì", "so với", " hay là "]
+    if any(ind in topic_lower for ind in VS_INDICATORS):
+        return "vs"
 
     # Đếm số keyword match cho mỗi intent
     scores = {}

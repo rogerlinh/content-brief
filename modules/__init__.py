@@ -11,6 +11,7 @@ Modules:
     internal_linking          – Phân tích Inbound/Outbound links từ Topical Map
     content_brief_builder     – Tổng hợp Content Brief
     markdown_exporter         – Xuất kết quả ra file .md
+    constants                 – Shared constants, thresholds, blacklists (P2c refactor)
 """
 
 from .csv_reader import read_topics

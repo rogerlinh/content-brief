@@ -326,3 +326,155 @@ Giúp bài viết đạt được trạng thái "Chuyên gia" trong mắt Google
 * **Named Entity Recognition (NER - Nhận diện Thực thể Định danh):**
 * **Định nghĩa:** Khả năng nhận diện và gọi tên chính xác các tên riêng, tiêu chuẩn, tổ chức, địa danh.
 * **Áp dụng:** Ép AI dùng đúng từ chuyên ngành (ví dụ: "JIS G3101" thay vì "tiêu chuẩn Nhật", "Posco" thay vì "nhà máy thép").
+
+---
+
+### 7. KORAY MINDSHARE MODEL — Cấu trúc Dàn Ý
+
+Dùng **Mindshare Model** để tạo dàn ý content brief:
+
+```
+[MAIN] Định nghĩa / Tổng quan (Definition)
+[MAIN] Thuộc tính / Phân loại / Đặc điểm (Attributes)
+[MAIN] So sánh / Phân tích (Comparison/Analysis)
+[MAIN] Ứng dụng / Cách sử dụng (Application)
+[SUPP] FAQ (Câu hỏi thường gặp)
+[SUPP] Kết luận / Lưu ý (Antonym Ending)
+```
+
+**Tỷ lệ MAIN vs SUPP:**
+- [MAIN] = 65-80% tổng số H2
+- [SUPP] = 20-35% tổ�ng số H2
+
+**SAPO (Supplementary Angle Paragraph Opening):**
+Mỗi section [MAIN] phải mở đầu bằng paragraph ≥80 từ trả lời trực tiếp câu hỏi từ heading.
+Công thức SAPO: Định nghĩa → Thuộc tính cốt lõi → Ứng dụng → Brand context tự nhiên
+
+---
+
+### 8. 12 QUY TẮC VIẾT SEMANTIC SEO (Semantic SEO Writing Rules)
+
+#### Rule 1: Proper Word Sequence
+Sắp xếp thuộc tính quan trọng lên đầu câu.
+- ❌ "A car, which is red and fast, sped by"
+- ✅ "A fast, red car sped by"
+
+#### Rule 2: Factual Certainty
+Dùng ngôn ngữ chắc chắn, tránh "will", "should", "có thể".
+- ❌ "Thép này sẽ tốt cho công trình"
+- ✅ "Thép này được thiết kế cho công trình chịu lực với độ bền cao"
+
+#### Rule 3: Eliminate Fluff
+Loại bỏ từ thừa, câu vòng vo.
+- ❌ "Đây là một thực tế không thể phủ nhận rằng để đạt được thành công"
+- ✅ "Kiên trì là chìa khóa thành công"
+
+#### Rule 4: Numeric Values
+Luôn dùng số cụ thể.
+- ❌ "Thép này có nhiều ưu điểm"
+- ✅ "Thép này có 7 ưu điểm nổi bật"
+
+#### Rule 5: Qualify Instances
+Chỉ rõ mức độ, loại, số lượng.
+- ❌ "Bệnh có các triệu chứng"
+- ✅ "Bệnh có 3 triệu chứng phổ biến: sốt, ho, mệt mỏi"
+
+#### Rule 6: Contextual Verbs
+Dùng động từ phù hợp ngữ cảnh ngành:
+- Y tế → "tăng cường" ("Vitamin C tăng cường miễn dịch")
+- Kỹ thuật → "thiết kế cho" ("Thép này được thiết kế cho kết cấu chịu lực")
+- Kinh doanh → "phân phối", "cung cấp"
+
+#### Rule 7: Examples After Plural Nouns
+Sau danh từ số nhiều phải có ví dụ cụ thể.
+- ❌ "Các tiêu chuẩn thép phổ biến"
+- ✅ "Các tiêu chuẩn thép phổ biến bao gồm JIS G3101 (Nhật Bản), ASTM A36 (Mỹ), TCVN 1651 (Việt Nam)"
+
+#### Rule 8: Parallel Structure in Lists
+Dùng cùng loại từ trong danh sách.
+- ❌ "Ưu điểm: bền, dễ gia công, và có tính thẩm mỹ"
+- ✅ "Ưu điểm: bền, nhẹ, dễ gia công"
+
+#### Rule 9: Optimize First Sentence Under Heading
+Câu đầu tiên sau H2 phải trả lời trực tiếp câu hỏi từ heading.
+Heading: "Ứng dụng của thép thanh vằn là gì?"
+→ Câu mở đầu: "Thép thanh vằn được ứng dụng chủ yếu trong xây dựng kết cấu, cầu đường và các công trình công nghiệp."
+
+#### Rule 10: Answer Directness
+Trả lời ngay, không vòng vo.
+- ❌ "Trong bài viết này, chúng ta sẽ tìm hiểu về..."
+- ✅ [Viết định nghĩa ngay từ đầu câu đầu tiên]
+
+#### Rule 11: Anchor Text Context
+Trước khi internal link, nhắc đến keyword đó 1-5 lần với thông tin độc đáo.
+- ❌ "[...] do đó thép thanh vằn rất bền. Tìm hiểu thêm về [internal link: thép thanh vằn là gì]"
+- ✅ "[...] thép thanh vằn có cường độ chịu kéo 460 MPa. [Sau đó link: thép thanh vằn là gì]"
+
+#### Rule 12: Do Not Delay Answer
+Đưa câu trả lời lên đầu, bôi đậm câu trả lời, không phải từ khóa.
+
+---
+
+### 9. GOOGLE E-E-A-T & HELPFUL CONTENT CHECKLIST
+
+#### E-E-A-T Signals
+
+| Signal | Cách đưa vào Brief |
+|--------|---------------------|
+| **Experience** | "15+ năm kinh nghiệm cung cấp thép xây dựng toàn miền Bắc" |
+| **Expertise** | Trích dẫn JIS G3101, ASTM A36, TCVN 1651 — chuẩn kỹ thuật cụ thể |
+| **Authoritativeness** | Case study, chứng chỉ CO/CQ, khách hàng tiêu biểu |
+| **Trustworthiness** | Địa chỉ kho, hotline, MST, website chính thức |
+
+#### People-First Content (Tránh Search-First)
+
+**Đánh dấu ✅ nếu brief đảm bảo:**
+- [ ] Độc giả sẽ thấy hữu ích nếu đến trực tiếp
+- [ ] Thể hiện kiến thức thực chiến (không phải tổng hợp lại)
+- [ ] Có đủ thông tin để đạt mục đích tìm kiếm
+- [ ] Bổ sung giá trị thực sự so với top 10 SERP hiện tại
+- [ ] Không có lỗi s事实c phẩm rõ ràng
+
+**Cảnh báo ⚠️ — Search-First Content:**
+- [ ] Chủ yếu để thu hút tìm kiếm thay vì giúp người đọc
+- [ ] Viết cho "keyword" thay vì cho người
+- [ ] Tổng hợp lại không có thêm giá trị
+- [ ] Ngày/tháng thay đổi giả tạo để tạo "freshness"
+
+---
+
+### 10. GEO / AI OVERVIEW OPTIMIZATION (Generative Engine Optimization)
+
+#### Cách AI đọc nội dung
+1. AI **không duyệt** — nó **trích xuất** (extract)
+2. Câu ngắn (15-20 từ) được ưu tiên
+3. Cấu trúc H2/H3/H4 rõ ràng = máy hiểu dễ
+4. FAQ schema = AI citations cao
+
+#### GEO Checklist cho mỗi Brief
+- [ ] Heading ngắn gọn, trả lời trực tiếp câu hỏi
+- [ ] Câu đầu mỗi đoạn ≤20 từ
+- [ ] Số liệu cụ thể ( %, kg, mm, MPa — không phải "nhiều", "lớn")
+- [ ] FAQ schema markup hướng dẫn cho writer
+- [ ] Bảng so sánh với headers rõ ràng
+- [ ] Bold key facts (không phải keyword)
+- [ ] Internal links có context justification
+
+---
+
+### 11. REVIEW WRITING STANDARDS (14 Best Practices từ Google)
+
+1. Đánh giá từ góc nhìn người dùng
+2. Thể hiện kiến thức chuyên môn về sản phẩm
+3. Bằng chứng trực quan: hình ảnh thực tế, test results, specs
+4. Số liệu định lượng: bảng so sánh thông số kỹ thuật
+5. Nêu rõ điểm khác biệt với đối thủ
+6. Cover comparable things / use cases cụ thể
+7. Ưu điểm VÀ nhược điểm dựa trên research thực tế
+8. Evolution từ model/version trước
+9. Các yếu tố quyết định mua hàng (với bằng chứng)
+10. Thiết kế và tác động thực tế lên người dùng
+11. Links đến resources hữu ích
+12. Nhiều vendor links cho user choice
+13. "Best for X" claim phải có first-hand evidence
+14. Đủ hữu ích ngay cả khi không có affiliate links

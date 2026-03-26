@@ -542,12 +542,33 @@ def generate_eav_table(
             "1. Output PHẢI là bảng Markdown (bắt đầu bằng `|`).\n"
             "2. Bảng phải liệt kê các Attribute theo 3 nhóm (Root Attributes, Universal Attributes, Rare/Unique Attributes) theo mức độ thu hẹp dần (Khoảng cách thực thể).\n"
             "3. Mỗi entity phải có ≥6 attributes quan trọng nhất (kỹ thuật ưu tiên).\n"
-            "4. Values phải cụ thể, CÓ ĐƠN VỊ ĐO VẬT LÝ NẾU LÀ THÔNG SỐ (VD: mm, kg/m, MPa, %, °C). ĐẶC BIỆT LƯU Ý ĐƠN VỊ ĐO LƯỜNG PHẢI PHÙ HỢP VỚI NGỮ CẢNH VẬT LÝ CỦA SẢN PHẨM (Ví dụ: Thép cuộn thường đo bằng 'kg/cuộn' chứ KHÔNG PHẢI 'kg/m', Thép vằn thì đo bằng 'kg/m' hoặc 'cây'). Ghi [CẦN XÁC MINH] nếu chưa chắc (đặc biệt là Giá cả biến động).\n"
-            "5. KHÔNG để ô trống — nếu không biết ghi [CẦN XÁC MINH].\n"
+            "4. Don vi do BUOC phu hop nganh. Neu la GIA (gia tham khao, lai suat, ty gia, chi phi) hoac khong chac chan -> BUOC ghi [CAN XAC MINH], TUYET DOI KHONG tu bya so.\n"
+            "5. KHONG de o trong — neu khong biet ghi [CAN XAC MINH].\n"
             "OUTPUT CHỈ LÀ BẢNG MARKDOWN, KHÔNG CÓ TEXT GIỚI THIỆU."
         )
         system = inject_semantic_prompt(base_system)
         system = inject_source_context(system, project)
+
+        # Phase 37: Industry-aware unit guidance
+        industry_units_map = {
+            "commodity_trading": "% [phan tram], VND, nam, diem %, lan/nam, ngay, ty le ky quy [%]",
+            "construction_material": "mm, kg/m, kg/cuon, MPa, C [do], m, tan, cay, cuon, m3",
+            "food_nutrition": "g, kcal, mg, mcg, %, IU, g/100g, ml",
+            "tech_gadget": "GHz, nm, mAh, GB, inch, MP, W, dB",
+            "finance_law": "% [phan tram], VND, nam, diem %, ngay, thang",
+            "general": "mm, kg, m, % [phan tram], C [do], VND, nam",
+        }
+        niche_for_eav = "general"
+        try:
+            if project and hasattr(project, "industry") and project.industry:
+                from modules.content_brief_builder import detect_niche as _dn
+                niche_for_eav = _dn(topic, project.industry)
+            else:
+                from modules.content_brief_builder import detect_niche as _dn
+                niche_for_eav = _dn(topic)
+        except Exception:
+            pass
+        unit_guide_str = industry_units_map.get(niche_for_eav, industry_units_map["general"])
 
         entity = analysis.get("central_entity", topic)
         attrs = analysis.get("entity_attributes", {})
@@ -587,16 +608,22 @@ def generate_eav_table(
                 f"| ... | ... | ... |\n\n"
                 f"QUY TẮC:\n"
                 f"- Tối thiểu 6 rows (định nghĩa, kích thước, độ bền, ứng dụng, giá, ưu/nhược điểm)\n"
-                f"- Mọi số liệu kỹ thuật phải có đơn vị đo (mm, MPa, VNĐ/kg...)\n"
-                f"- Giá tham khảo LUÔN đánh dấu [CẦN XÁC MINH]\n"
-                f"- KHÔNG để ô trống — nếu không biết ghi [CẦN XÁC MINH]\n"
+                f"- Don vi do phu hop nganh: {unit_guide_str}\n"
+                f"- Gia tham khao LUON danh dau [CAN XAC MINH]\n"
+                f"- TUYET DOI: Neu khong chac chan gia tri -> BUOC ghi [CAN XAC MINH], KHONG tu bya so\n"
+                f"- KHONG de o trong — neu khong biet ghi [CAN XAC MINH]\n"
             )
         else:
             user = (
                 f"Từ khóa: '{topic}'\n"
                 f"Central Entity: '{entity}'\n"
                 f"Attributes đã biết:\n{attrs_str}\n\n"
-                "Hãy tạo bảng EAV đầy đủ với 3 cột: | Entity | Attribute | Value |. Nếu có thông số kỹ thuật, ưu tiên thêm vào."
+                f"Hãy tạo bảng EAV đầy đủ với 3 cột: | Entity | Attribute | Value |.\n"
+                f"QUY TAC:\n"
+                f"- Moi gia tri SOI phai co don vi do phu hop nganh: {unit_guide_str}\n"
+                f"- TUYET DOI: Gia (gia tham khao, lai suat, ty gia, chi phi) -> BUOC ghi [CAN XAC MINH]\n"
+                f"- TUYET DOI: Neu khong chac chan -> BUOC ghi [CAN XAC MINH], KHONG tu bya so\n"
+                f"- KHONG de o trong — neu khong biet ghi [CAN XAC MINH]\n"
             )
 
         result = _call_llm(client, model, system, user, max_tokens=1000)

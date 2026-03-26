@@ -174,9 +174,90 @@ def _render_markdown(brief: Dict) -> Tuple[str, str, str]:
     status_icon = "✅" if ratio_pct >= 50 else "⚠️"
     lines.append(f"> {status_icon} H3 Ratio: {h3_count} H3 / {h2_count} H2 = {ratio_pct}% (chuẩn ≥50%)")
     lines.append("")
+
+    # ── Koray: H3 Micro-Briefing (each H3 gets its own micro-briefing) ──
+    h3_list = [(h["text"], h.get("parent_h2", "")) for h in heading_structure if h.get("level") == "H3"]
+    if h3_list:
+        lines.append("> **🎯 H3 Micro-Briefing (Koray: Mỗi H3 có hướng dẫn riêng):**")
+        lines.append("")
+        for h3_text, parent_h2 in h3_list:
+            clean_h3 = h3_text.replace("[MAIN] ", "").replace("[SUPP] ", "").replace("↳ ", "").strip()
+            # Find micro_data for this H3's parent H2
+            parent_clean = parent_h2.replace("[MAIN] ", "").replace("[SUPP] ", "").strip() if parent_h2 else ""
+            # Get info_gain from parent H2 micro_briefing
+            h3_hint = ""
+            for micro in (micro_data or []):
+                h2_name = micro.get("h2", "")
+                h2_clean = h2_name.replace("[MAIN] ", "").replace("[SUPP] ", "").strip()
+                if parent_clean and (parent_clean.lower() in h2_clean.lower() or h2_clean.lower() in parent_clean.lower()):
+                    ig = micro.get("info_gain", "")
+                    if ig:
+                        # Extract H3 names if mentioned in info_gain
+                        import re as _re2
+                        h3_names = _re2.findall(r'(?:gồm:|bao gồm:)\s*([^.]+)', ig, _re2.IGNORECASE)
+                        if h3_names:
+                            h3_hint = h3_names[0].strip()
+                    break
+            lines.append(f"- **H3: {clean_h3}**")
+            if h3_hint:
+                hint_clean = h3_hint.split(",")[0].strip() if "," in h3_hint else h3_hint.strip()
+                lines.append(f"  ↳ {hint_clean[:100]}{'...' if len(h3_hint) > 100 else ''}")
+            else:
+                lines.append(f"  ↳ Viết 80-150 từ. Bắt đầu bằng câu trả lời trực tiếp câu hỏi H3. Có số liệu kỹ thuật cụ thể.")
+            lines.append("")
     section_num += 1
 
-    # ── 1.3 HƯỚNG DẪN VIẾT CHI TIẾT TỪNG H2 ──
+    # ── 1.3 KORAY COLUMNS (EAV + Macro Context + FS/PAA Map + Source Context) ──
+    eav_block    = brief.get("eav_table", "") or brief.get("eav", "")
+    macro_block   = brief.get("macro_context", "") or brief.get("macro_context_str", "")
+    fspaa_block   = brief.get("fs_paa_map", "") or brief.get("fs_paa", "")
+    src_ctx_block = brief.get("source_context_alignment", "") or ""
+
+    has_koray = macro_block or eav_block or fspaa_block or src_ctx_block
+    if has_koray:
+        lines.append(f"## {section_num}. Bảng Phân Tích Koray")
+        lines.append("")
+        lines.append("> Nhung phan tich chuyen su thu 4 (Chi phi Toc thoi - Thu thuat Tot nhat): EAV Table, Macro Context, FS/PAA Map, Source Context Alignment.")
+        lines.append("")
+
+        if macro_block:
+            lines.append("### D. Macro Context")
+            lines.append("")
+            for l in macro_block.strip().splitlines():
+                if l.strip():
+                    lines.append(l)
+            lines.append("")
+
+        if eav_block:
+            lines.append("### E. EAV Table (Entity - Attribute - Value)")
+            lines.append("")
+            lines.append("> Bang EAV la THANH PHAN BAT BUOC — Neu khong co, Writer se khong biet cac thuoc tinh ky thuat cu the cua san pham.")
+            lines.append("")
+            # Render as-is (may already be markdown table)
+            for l in eav_block.strip().splitlines():
+                if l.strip():
+                    lines.append(l)
+            lines.append("")
+
+        if fspaa_block:
+            lines.append("### J. FS/PAA Map")
+            lines.append("")
+            for l in fspaa_block.strip().splitlines():
+                if l.strip():
+                    lines.append(l)
+            lines.append("")
+
+        if src_ctx_block:
+            lines.append("### O. Source Context Alignment")
+            lines.append("")
+            for l in src_ctx_block.strip().splitlines():
+                if l.strip():
+                    lines.append(l)
+            lines.append("")
+
+        section_num += 1
+
+    # ── 1.4 HƯỚNG DẪN VIẾT CHI TIẾT TỪNG H2 ──
     if micro_data:
         lines.append(f"## {section_num}. Hướng Dẫn Viết Chi Tiết")
         lines.append("")
@@ -192,7 +273,7 @@ def _render_markdown(brief: Dict) -> Tuple[str, str, str]:
                 lines.append("### 📝 SAPO (Đoạn mở đầu)")
             else:
                 lines.append(f"### {h2_title}")
-            
+
             if intent_tag:
                 lines.append(f"*Intent: {intent_tag}*")
             lines.append("")
@@ -202,14 +283,57 @@ def _render_markdown(brief: Dict) -> Tuple[str, str, str]:
             per_h2_dict = ctx_v4.get("per_h2", {}) if isinstance(ctx_v4, dict) else {}
             if isinstance(per_h2_dict, list):
                 per_h2_dict = {item.get("h2", "Heading"): item for item in per_h2_dict if isinstance(item, dict)}
-            
+
+            # ── Dynamic project context ──
+            project_ctx = brief.get("_project_context")
+            brand_name = ""
+            brand_lower = ""
+            # Phase 37 fix: handle both object (Project dataclass) and dict
+            if project_ctx:
+                if hasattr(project_ctx, "brand_name"):
+                    # Project dataclass object
+                    brand_name = getattr(project_ctx, "brand_name", "")
+                    brand_lower = brand_name.lower()
+                elif isinstance(project_ctx, dict):
+                    # Dict format fallback
+                    brand_name = project_ctx.get("brand_name", "")
+                    brand_lower = brand_name.lower()
+            # Build dynamic brand keywords (lowercase + partial matches)
+            brand_keywords_main = []
+            if brand_lower:
+                brand_keywords_main = [
+                    brand_lower,
+                    brand_lower.replace(" ", ""),
+                ]
+            brand_keywords_main += [
+                "với kinh nghiệm", "chuyên", "phân phối", "cung cấp", "tại miền",
+                "biên soạn", "đơn vị chuyên", "hotline", "liên hệ",
+            ]
+
             clean_h2_title = h2_title.replace("[MAIN] ", "").replace("[SUPP] ", "").strip()
             h2_inst = None
             for key, val in per_h2_dict.items():
+                # Phase 37: First H2 of the article renders macro_rules block once
+                if i == 0:
+                    macro_rules = ctx_v4.get("macro_rules", {}) if isinstance(ctx_v4, dict) else {}
+                    if macro_rules:
+                        lines.append("")
+                        lines.append("> **Koray Macro Rules (Toàn Bài):**")
+                        if macro_rules.get("central_entity_term"):
+                            lines.append(f"> - **Central Entity:** {macro_rules['central_entity_term']}")
+                        if macro_rules.get("predicate_cluster"):
+                            pc = macro_rules["predicate_cluster"]
+                            if isinstance(pc, list): pc = ", ".join(pc)
+                            lines.append(f"> - **Predicate Cluster:** {pc}")
+                        if macro_rules.get("tonality"):
+                            lines.append(f"> - **Tonality:** {macro_rules['tonality']}")
+                        lines.append("")
                 if clean_h2_title in key or key in clean_h2_title:
                     h2_inst = val
                     break
-                    
+
+            # ── Koray Contextual Structure (h2_inst from Agent 4) ──
+            is_main = "[MAIN]" in h2_title
             if h2_inst:
                 lines.append("> 🎯 **Koray Contextual Structure (Khung bài viết):**")
                 if h2_inst.get("content_format"):
@@ -217,15 +341,32 @@ def _render_markdown(brief: Dict) -> Tuple[str, str, str]:
                 fs = h2_inst.get("first_sentence") or h2_inst.get("first_sentence_pattern", "")
                 if fs:
                     lines.append(f"> - **First Sentence:** {fs}")
+                # Agent 4 micro_terms: per-H2 specific terms
                 mt = h2_inst.get("micro_terms") or h2_inst.get("micro_context_terms", [])
                 if mt:
                     if isinstance(mt, list):
                         mt = ", ".join(mt)
                     lines.append(f"> - **Micro Terms:** {mt}")
+                # Agent 3 entities as Micro Terms fallback (unique per H2)
+                elif micro.get("entities"):
+                    ent_str = micro.get("entities", "")
+                    # Take only first 5 unique terms for micro_terms display
+                    ents = [e.strip() for e in ent_str.replace(",", ";").split(";") if e.strip()][:5]
+                    if ents:
+                        mt_str = ", ".join(ents)
+                        lines.append(f"> - **Micro Terms:** {mt_str}")
+                        if len(ents) < 2:
+                            lines.append(f"> ⚠️ Micro Terms yếu — cần thêm terms cụ thể hơn cho H2 này")
+                # Phase 37: Koray Component ④ — Sentence Before List/Table
+                if h2_inst.get("sentence_before"):
+                    lines.append(f"> - **Sentence Before:** {h2_inst['sentence_before']}")
                 if h2_inst.get("preceding_question"):
                     lines.append(f"> - **Preceding Question:** {h2_inst['preceding_question']}")
-                if h2_inst.get("contextual_bridge"):
-                    lines.append(f"> - **Bridge:** {h2_inst['contextual_bridge']}")
+                bridge = h2_inst.get("contextual_bridge", "")
+                if is_main and any(bk in bridge.lower() for bk in brand_keywords_main):
+                    lines.append(f"> ⚠️ **LỖI KORAY:** Brand/hotline trong [MAIN] bridge — chỉ được phép trong [SUPP]")
+                if bridge:
+                    lines.append(f"> - **Bridge:** {bridge}")
                 if h2_inst.get("boolean_h3"):
                     lines.append(f"> - **Boolean H3:** {h2_inst['boolean_h3']}")
                 if h2_inst.get("tonality"):
@@ -234,14 +375,89 @@ def _render_markdown(brief: Dict) -> Tuple[str, str, str]:
                     lines.append(f"> - **Khối lượng:** {h2_inst['word_count_target']}")
                 lines.append("")
 
-            # Compact: gộp tất cả blocks vào 1 section gọn
+            # ── Koray Enforcement Layer: Featured Snippet ≤40 words ──
             if micro.get("snippet"):
+                raw_snippet = micro["snippet"]
+                word_count = len(raw_snippet.split())
+                is_over = word_count > 40
+
                 if is_sapo:
-                    label = "**SAPO (80-120 từ) — Câu mở đầu định nghĩa + Brand + Liệt kê H2:**"
+                    # ── Koray SAPO: split into Definition + Brand + H2 List ──
+                    # Brand keywords that indicate Source Context insertion
+                    brand_keywords = ["thép trần long", "tran long", "với kinh nghiệm",
+                                      "chuyên", "phân phối", "cung cấp", "tại miền",
+                                      "biên soạn", "đơn vị chuyên"]
+                    words = raw_snippet.split()
+
+                    # ── Split SAPO into 3 parts ──
+                    definition_words = []
+                    brand_words = []
+                    h2_list_words = []
+                    phase = "definition"  # "definition" → "brand" → "h2_list"
+
+                    for w in words:
+                        w_lower = w.lower().rstrip(".,;:")
+                        # Phase transition: definition → brand
+                        if phase == "definition" and any(bk in w_lower for bk in brand_keywords):
+                            phase = "brand"
+                        # Phase transition: brand → h2_list
+                        if phase in ("definition", "brand") and any(m in w_lower for m in ["lần lượt", "bao gồm:", "gồm:"]):
+                            phase = "h2_list"
+
+                        if phase == "definition":
+                            definition_words.append(w)
+                        elif phase == "brand":
+                            brand_words.append(w)
+                        else:  # h2_list
+                            h2_list_words.append(w)
+
+                    definition_text = " ".join(definition_words)
+                    brand_text = " ".join(brand_words)
+                    h2_list_text = " ".join(h2_list_words)
+
+                    # ── A. Featured Snippet (Definition) — Koray-compliant ≤40 words ──
+                    fs_count = len(definition_text.split())
+                    lines.append("**A. Featured Snippet — Câu trả lời định nghĩa (≤40 từ):**")
+                    lines.append(definition_text)
+                    lines.append("")
+                    if fs_count <= 40:
+                        lines.append(f"> ✅ FS Definition: {fs_count} từ (Koray-compliant)")
+                    else:
+                        fs_trunc = " ".join(definition_text.split()[:40])
+                        lines.append(f"> ⚠️ **LỖI KORAY:** FS Definition {fs_count} từ (vượt ≤40). Rút gọn:")
+                        lines.append(f"> {fs_trunc}...")
+                    lines.append("")
+
+                    # ── B. Brand (Source Context) — Koray: brand ONLY in [SUPP]/bridge ──
+                    _proj = brief.get("_project_context")
+                    _brand = getattr(_proj, "brand_name", "") if _proj else "Doanh nghiệp"
+                    if brand_text.strip():
+                        lines.append(f"**B. Brand — Nguồn gốc & Chuyên môn ({_brand}):**")
+                        lines.append(brand_text.strip().rstrip("."))
+                        lines.append("")
+                        lines.append(f"> 🔗 Koray: Brand chỉ xuất hiện trong [SUPP] hoặc cuối bridge, KHÔNG trong FS Block")
+                    else:
+                        lines.append(f"**B. Brand — Nguồn gốc & Chuyên môn ({_brand}):**")
+                        lines.append("[Tự động sinh khi có EAV Table — LLM ghi nhận thông tin thương hiệu]")
+                        lines.append("")
+
+                    # ── C. H2 Roadmap ──
+                    if h2_list_text.strip():
+                        lines.append("**C. Roadmap bài viết (Các H2 chính):**")
+                        lines.append(h2_list_text.strip())
+                        lines.append("")
                 else:
-                    label = "**A. Trả lời trực diện (Featured Snippet ≤40 từ):**"
-                lines.append(f"{label} {micro['snippet']}")
-                lines.append("")
+                    # Regular H2: Featured Snippet ≤40 words
+                    lines.append("**A. Featured Snippet (≤40 từ):**")
+                    lines.append(raw_snippet)
+                    lines.append("")
+                    if is_over:
+                        fs_trunc = " ".join(raw_snippet.split()[:40])
+                        lines.append(f"> ⚠️ **LỖI KORAY:** Snippet {word_count} từ (vượt ≤40). Rút gọn:")
+                        lines.append(f"> {fs_trunc}...")
+                    else:
+                        lines.append(f"> ✅ FS {word_count} từ (Koray-compliant)")
+                    lines.append("")
 
             if micro.get("entities"):
                 lines.append(f"**Entities:** {micro['entities']}")
@@ -371,8 +587,19 @@ def _render_markdown(brief: Dict) -> Tuple[str, str, str]:
     # ── V11-S3: TOPICAL MAP POSITION ──
     import csv as _csv
     _base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    _topics_path = os.path.join(_base_dir, "topics.csv")
-    if os.path.exists(_topics_path):
+    _topics_path = None
+    # Ưu tiên: project-specific topical_map_csv
+    _project_ctx = brief.get("_project_context")
+    if _project_ctx and isinstance(_project_ctx, dict):
+        _proj_csv = _project_ctx.get("topical_map_csv", "")
+        if _proj_csv and os.path.exists(_proj_csv):
+            _topics_path = _proj_csv
+    # Fallback: global topics.csv
+    if not _topics_path:
+        _fallback = os.path.join(_base_dir, "topics.csv")
+        if os.path.exists(_fallback):
+            _topics_path = _fallback
+    if _topics_path:
         try:
             _all_topics = []
             with open(_topics_path, mode="r", encoding="utf-8") as _f:
