@@ -490,6 +490,44 @@ def _process_single_topic(
     return filepath
 
 
+def generate_content_brief(
+    topic: str,
+    enable_serp: bool = False,
+    enable_network: bool = False,
+    enable_context: bool = False,
+    enable_linking: bool = False,
+    methodology: str = "auto",
+    output_dir: str = "output_ui",
+    project=None,
+) -> str:
+    """Public single-topic entrypoint for Streamlit app."""
+    total_steps = 4
+    if enable_serp:
+        total_steps += 2
+    if enable_network:
+        total_steps += 1
+    if enable_context:
+        total_steps += 1
+    if enable_linking:
+        total_steps += 1
+
+    os.makedirs(output_dir, exist_ok=True)
+    return _process_single_topic(
+        topic=topic,
+        enable_serp=enable_serp,
+        enable_network=enable_network,
+        enable_context=enable_context,
+        enable_linking=enable_linking,
+        methodology=methodology,
+        output_dir=output_dir,
+        total_steps=total_steps,
+        glog=None,
+        csv_log=None,
+        csv_row=-1,
+        project=project,
+    )
+
+
 def run_pipeline(
     input_csv: str,
     output_dir: str,

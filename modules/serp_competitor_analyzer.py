@@ -19,6 +19,7 @@ import re
 import requests
 from collections import Counter
 from typing import Dict, List, Tuple
+from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
@@ -472,20 +473,30 @@ async def _scrape_competitors(urls: List[str], headless: bool) -> List[Dict]:
     Returns:
         List of competitor data dicts.
     """
-    from playwright.async_api import async_playwright
+    return _scrape_competitors_with_requests(urls)
+
+    """
+    try:
+        from playwright.async_api import async_playwright
+    except ImportError:
+        logger.warning(
+            "  [COMPETITOR] Playwright khong co san. Fallback sang requests + BeautifulSoup."
+        )
+        return _scrape_competitors_with_requests(urls)
 
     competitors = []
 
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=headless)
-        context = await browser.new_context(
-            locale="vi-VN",
-            user_agent=(
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/131.0.0.0 Safari/537.36"
-            ),
-        )
+    try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=headless)
+            context = await browser.new_context(
+                locale="vi-VN",
+                user_agent=(
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/131.0.0.0 Safari/537.36"
+                ),
+            )
 
         for i, url in enumerate(urls[:MAX_COMPETITORS]):
             logger.info("  [COMPETITOR %d/%d] Truy cập: %s",
@@ -538,7 +549,75 @@ async def _scrape_competitors(urls: List[str], headless: bool) -> List[Dict]:
                     "error": str(e),
                 })
 
-        await browser.close()
+            await browser.close()
+    except Exception as e:
+        logger.warning(
+            "  [COMPETITOR] Playwright launch that bai (%s). Fallback sang requests + BeautifulSoup.",
+            str(e),
+        )
+        return _scrape_competitors_with_requests(urls)
+
+    return competitors
+    """
+
+
+def _scrape_competitors_with_requests(urls: List[str]) -> List[Dict]:
+    """Fallback scrape cho moi truong cloud khi khong co Playwright/browser."""
+    competitors = []
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/131.0.0.0 Safari/537.36"
+        )
+    }
+
+    for i, url in enumerate(urls[:MAX_COMPETITORS]):
+        logger.info("  [COMPETITOR-FALLBACK %d/%d] Truy cap: %s",
+                    i + 1, len(urls), url[:80])
+        try:
+            response = requests.get(url, headers=headers, timeout=15)
+            response.raise_for_status()
+
+            soup = BeautifulSoup(response.text, "html.parser")
+            for noisy_tag in soup(["script", "style", "noscript", "iframe", "svg"]):
+                noisy_tag.decompose()
+
+            headings = []
+            for tag in soup.find_all(["h1", "h2", "h3"]):
+                text = tag.get_text(" ", strip=True)
+                if text:
+                    headings.append({
+                        "level": tag.name.upper(),
+                        "text": text,
+                    })
+
+            body_text = " ".join(soup.get_text(" ", strip=True).split())
+            ngrams_2 = _compute_ngrams(body_text, n=2)
+            ngrams_3 = _compute_ngrams(body_text, n=3)
+
+            competitors.append({
+                "url": url,
+                "headings": headings,
+                "body_text": body_text,
+                "word_count": len(body_text.split()),
+                "ngrams_2": ngrams_2[:20],
+                "ngrams_3": ngrams_3[:20],
+                "source": "requests_fallback",
+            })
+        except Exception as e:
+            logger.warning("  [COMPETITOR-FALLBACK %d/%d] Loi: %s",
+                           i + 1, len(urls), str(e))
+            competitors.append({
+                "url": url,
+                "headings": [],
+                "body_text": "",
+                "word_count": 0,
+                "ngrams_2": [],
+                "ngrams_3": [],
+                "error": str(e),
+                "source": "requests_fallback",
+            })
 
     return competitors
 
