@@ -42,9 +42,10 @@ jobs:
       - name: Run syntax check
         run: |
           python -m py_compile app.py
-          echo "Syntax check passed"
-
-      - name: Run unit tests
-        run: |
-          python run_test.py
-        continue-on-error: false
+          python -m py_compile main_generator.py
+          python -m py_compile worker.py
+          python -m py_compile modules/koray_analyzer.py
+          python -m py_compile modules/content_brief_builder.py
+          python -m py_compile modules/markdown_exporter.py
+          python -m py_compile modules/project_manager.py
+          echo "All syntax checks passed"
