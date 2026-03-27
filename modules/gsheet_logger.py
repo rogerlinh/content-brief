@@ -72,7 +72,7 @@ class GSheetLogger:
         self._connected = False
         self.has_error = False
         # P1 FIX: Cache col_values để tránh O(n) scan mỗi lần gọi start_keyword
-        self._col_a_cache: Dict[str, int] = {}  # keyword_lower -> row
+        self._col_a_cache: Dict[str, int] = {}  # keyword_lower -> latest row
 
     def connect(self, sheet_url: str = None) -> bool:
         """
@@ -152,77 +152,64 @@ class GSheetLogger:
         except Exception as e:
             logger.warning("[GSHEET] Lỗi refresh cache cột A: %s", str(e))
 
+    def _next_available_row(self) -> int:
+        """Luon append xuong cuoi de rerun cung keyword van tao dong moi."""
+        try:
+            all_values = self.worksheet.get_all_values()
+            return len(all_values) + 1
+        except Exception as e:
+            logger.warning("[GSHEET] Khong lay duoc dong cuoi: %s", str(e))
+            try:
+                return len(self.worksheet.col_values(1)) + 1
+            except Exception:
+                return 2
+
     def start_keyword(self, keyword: str) -> int:
         """
-        Bắt đầu xử lý 1 keyword — TÌM dòng cũ hoặc tạo dòng mới.
-        MỌI thao tác GSheet đều bọc try/except riêng biệt.
-
-        P1 FIX:
-          - Dùng cache _col_a_cache thay vì O(n) scan mỗi lần
-          - Batch write keyword + status + format trong 1 call
-
-        Returns:
-            Số dòng (row number), hoặc -1 nếu GSheet lỗi.
+        Bat dau xu ly 1 keyword.
+        Moi lan chay luon append mot dong moi tren Google Sheet,
+        ke ca khi keyword da ton tai tu truoc.
         """
         if not self._connected:
-            print("⚠️ [GSHEET] Chưa kết nối. Bỏ qua start_keyword.")
+            print("[GSHEET] Chua ket noi. Bo qua start_keyword.")
             return -1
 
         kw_lower = keyword.strip().lower()
         target_row = -1
 
-        # ── Bước 1: Tìm keyword trong cache ──
-        print(f"➡️ [GSHEET] Đang tìm keyword '{keyword}' trên Sheet...")
+        print(f"[GSHEET] Chuan bi ghi keyword '{keyword}' len Sheet...")
         try:
-            # P1 FIX: Dùng cache thay vì scan lại
+            self._refresh_col_a_cache()
             if kw_lower in self._col_a_cache:
-                target_row = self._col_a_cache[kw_lower]
-                print(f"✅ [GSHEET] Đã tìm thấy keyword ở dòng {target_row} (cache hit).")
-            else:
-                # Cache miss: refresh rồi tìm lại
-                self._refresh_col_a_cache()
-                if kw_lower in self._col_a_cache:
-                    target_row = self._col_a_cache[kw_lower]
-                    print(f"✅ [GSHEET] Đã tìm thấy keyword ở dòng {target_row} (sau refresh).")
-                else:
-                    # Tạo dòng mới
-                    target_row = len(self._col_a_cache) + 2  # +2 vì dòng 1 = header
-                    print(f"❌ [GSHEET] Không tìm thấy -> Tạo dòng mới: {target_row}")
-                # Cập nhật cache
-                self._col_a_cache[kw_lower] = target_row
-
+                print("[GSHEET] Keyword da co truoc do. Se append mot dong moi cho lan chay nay.")
+            target_row = self._next_available_row()
+            self._col_a_cache[kw_lower] = target_row
+            print(f"[GSHEET] Dong moi cho lan chay hien tai: {target_row}")
         except Exception as e:
             self.has_error = True
-            print(f"⚠️ [GSHEET] Lỗi tìm keyword: {e}")
-            logger.error("[GSHEET] Lỗi tìm keyword: %s", str(e))
+            print(f"[GSHEET] Loi tim keyword: {e}")
+            logger.error("[GSHEET] Loi tim keyword: %s", str(e))
             return -1
 
-        # ── Bước 2: Batch write keyword + status + format (P1 FIX: gộp 3 calls) ──
-        print(f"➡️ [GSHEET] Ghi '{keyword}' vào dòng {target_row}...")
+        print(f"[GSHEET] Ghi '{keyword}' vao dong {target_row}...")
         try:
-            # Ghi cùng lúc A, B, format
-            kw_value = keyword
-            status_value = "🔄 Running"
-            bg_color = {"red": 1.0, "green": 0.95, "blue": 0.8}
-
             self.worksheet.update(
                 range_name=f"A{target_row}:B{target_row}",
-                values=[[kw_value, status_value]],
+                values=[[keyword, "RUNNING"]],
             )
-            # P1 FIX: Bỏ 1.5s sleep sau ghi, giữ 0.8s duy nhất cho cả batch
             time.sleep(0.8)
-            self.worksheet.format(f"A{target_row}:R{target_row}", {
-                "backgroundColor": bg_color,
-            })
-            # P1 FIX: Bỏ sleep sau format vì không cần thiết
-            print(f"✅ [GSHEET] Đã ghi keyword + format dòng {target_row}.")
+            self.worksheet.format(
+                f"A{target_row}:R{target_row}",
+                {"backgroundColor": {"red": 1.0, "green": 0.95, "blue": 0.8}},
+            )
+            print(f"[GSHEET] Da ghi keyword + format dong {target_row}.")
         except Exception as e:
             self.has_error = True
-            print(f"⚠️ [GSHEET] Lỗi ghi keyword: {e}")
-            logger.error("[GSHEET] Lỗi ghi keyword: %s", str(e))
-            return target_row  # Vẫn trả row để các bước sau thử ghi tiếp
+            print(f"[GSHEET] Loi ghi keyword: {e}")
+            logger.error("[GSHEET] Loi ghi keyword: %s", str(e))
+            return target_row
 
-        logger.info("[GSHEET] Keyword '%s' ở dòng %d", keyword, target_row)
+        logger.info("[GSHEET] Keyword '%s' o dong %d", keyword, target_row)
         return target_row
 
     def update_cell(self, row: int, column_name: str, value: str):

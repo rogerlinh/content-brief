@@ -87,7 +87,7 @@ def inject_ui_css() -> None:
             border: 1px solid transparent;
             border-radius: 22px;
             padding: 0.9rem 1rem;
-            box-shadow: 10px 10px 24px var(--shadow-lo), -10px -10px 24px var(--shadow-hi);
+            box-shadow: 14px 14px 30px var(--shadow-lo), -14px -14px 30px var(--shadow-hi);
         }
         div[data-testid="stMetricLabel"], div[data-testid="stMetricValue"] {
             color: var(--ink);
@@ -98,7 +98,7 @@ def inject_ui_css() -> None:
             padding: 1.4rem 1.5rem;
             background:
                 linear-gradient(145deg, #eef3f9 0%, #e2e9f2 100%);
-            box-shadow: 18px 18px 35px var(--shadow-lo), -18px -18px 35px var(--shadow-hi);
+            box-shadow: 24px 24px 46px rgba(168, 180, 197, 0.78), -18px -18px 38px rgba(255,255,255,0.96);
             margin-bottom: 1rem;
         }
         .hero-kicker {
@@ -133,14 +133,14 @@ def inject_ui_css() -> None:
             padding: 0.45rem 0.8rem;
             color: var(--ink);
             font-size: 0.9rem;
-            box-shadow: 8px 8px 18px var(--shadow-lo), -8px -8px 18px var(--shadow-hi);
+            box-shadow: 10px 10px 22px rgba(171, 183, 200, 0.72), -8px -8px 16px rgba(255,255,255,0.92);
         }
         .panel-note {
             border: 1px solid rgba(255,255,255,0.65);
             background: var(--panel);
             border-radius: 24px;
             padding: 1rem 1.1rem;
-            box-shadow: 12px 12px 28px var(--shadow-lo), -12px -12px 28px var(--shadow-hi);
+            box-shadow: 18px 18px 36px rgba(169, 181, 198, 0.74), -14px -14px 28px rgba(255,255,255,0.94);
         }
         .panel-note h4 {
             margin: 0 0 0.35rem;
@@ -169,7 +169,7 @@ def inject_ui_css() -> None:
             border: 1px solid rgba(255,255,255,0.65) !important;
             background: linear-gradient(145deg, #eef3f9 0%, #dfe7f1 100%) !important;
             color: var(--ink) !important;
-            box-shadow: 9px 9px 20px var(--shadow-lo), -9px -9px 20px var(--shadow-hi) !important;
+            box-shadow: 13px 13px 24px rgba(169, 181, 198, 0.82), -10px -10px 20px rgba(255,255,255,0.96) !important;
         }
         .stButton > button[kind="primary"] {
             background: linear-gradient(135deg, rgba(79, 125, 243, 0.22), rgba(121, 196, 183, 0.24)) !important;
@@ -177,12 +177,28 @@ def inject_ui_css() -> None:
         div[data-testid="stDataFrame"], div[data-testid="stForm"], div[data-testid="stExpander"] {
             border-radius: 24px !important;
             background: var(--panel) !important;
-            box-shadow: 12px 12px 28px var(--shadow-lo), -12px -12px 28px var(--shadow-hi) !important;
+            box-shadow: 18px 18px 36px rgba(170, 182, 198, 0.74), -14px -14px 28px rgba(255,255,255,0.95) !important;
             border: 1px solid rgba(255,255,255,0.62) !important;
         }
         div[data-testid="stAlert"] {
             border-radius: 18px !important;
             box-shadow: 8px 8px 18px rgba(169, 181, 198, 0.35), -8px -8px 18px rgba(255,255,255,0.8) !important;
+        }
+        .lift-card {
+            border-radius: 22px;
+            padding: 0.95rem 1rem;
+            background: linear-gradient(145deg, #eef3f9 0%, #e3eaf3 100%);
+            border: 1px solid rgba(255,255,255,0.7);
+            box-shadow: 16px 16px 30px rgba(170, 182, 198, 0.72), -12px -12px 24px rgba(255,255,255,0.94);
+        }
+        .lift-card strong {
+            color: var(--ink);
+        }
+        .lift-card span {
+            color: var(--muted);
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.88rem;
         }
         </style>
         """,
@@ -596,6 +612,9 @@ def render_generate_tab(active_project, worker_running: bool) -> str:
                         st.error(csv_error)
 
             st.metric("Số keyword hợp lệ", len(keywords))
+            duplicate_count = len(keywords) - len(set(keywords))
+            if duplicate_count > 0:
+                st.info(f"Có {duplicate_count} keyword trùng trong batch hiện tại. Mỗi lần chạy vẫn được ghi riêng trên Google Sheet.")
             if keywords:
                 with st.expander("Xem trước keyword", expanded=False):
                     preview_df = pd.DataFrame({"Keyword": keywords[:100]})
@@ -632,10 +651,19 @@ def render_generate_tab(active_project, worker_running: bool) -> str:
             serper_ready = "Có" if os.environ.get("SERPER_API_KEY") else "Thiếu"
             project_ready = active_project.brand_name if active_project else "Chưa chọn"
 
-            stat1, stat2, stat3 = st.columns(3)
+            stat1, stat2 = st.columns(2)
             stat1.metric("OpenAI", openai_ready)
             stat2.metric("Serper", serper_ready)
-            stat3.metric("Project", project_ready)
+            st.markdown(
+                f"""
+                <div class="lift-card">
+                    <span>Project đang áp dụng</span>
+                    <strong>{project_ready}</strong>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.caption("Khi chạy lại cùng một keyword, app sẽ append một dòng mới trên Google Sheet thay vì ghi đè dòng cũ.")
 
             run_issues = validate_run_request(keywords, enable_serp)
             if run_issues:
