@@ -40,192 +40,329 @@ def inject_ui_css() -> None:
     st.markdown(
         """
         <style>
+        /* ══════════════════════════════════════════
+           MODERN FLAT DESIGN — Clean, Minimal, Fast
+           ══════════════════════════════════════════ */
+
         :root {
-            --bg: #e9eef5;
-            --panel: #eef3f9;
-            --panel-2: #e3eaf3;
-            --ink: #203047;
-            --muted: #5f7088;
-            --accent: #4f7df3;
-            --accent-2: #79c4b7;
-            --ok: #3faa72;
-            --danger: #d96a79;
-            --line: rgba(131, 146, 171, 0.20);
-            --shadow-hi: rgba(255, 255, 255, 0.95);
-            --shadow-lo: rgba(160, 174, 194, 0.65);
+            --bg:        #f0f4f8;
+            --surface:   #ffffff;
+            --border:    #e2e8f0;
+            --ink:       #1a202c;
+            --muted:     #64748b;
+            --accent:    #3b82f6;
+            --accent-2:  #10b981;
+            --ok:        #22c55e;
+            --danger:    #ef4444;
+            --warn:      #f59e0b;
+            --radius:    12px;
+            --radius-lg: 18px;
+            /* Soft elevation shadows (flat — no dual shadows) */
+            --shadow-sm:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md:  0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+            --shadow-lg:  0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04);
         }
+
+        /* ── App Background ── */
         .stApp {
-            background:
-                radial-gradient(circle at top left, rgba(79, 125, 243, 0.10), transparent 28%),
-                radial-gradient(circle at top right, rgba(121, 196, 183, 0.12), transparent 24%),
-                linear-gradient(180deg, #edf2f8 0%, #e6ecf4 100%);
+            background: var(--bg);
             color: var(--ink);
         }
         .block-container {
-            padding-top: 2rem;
-            padding-bottom: 2rem;
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
         }
+
+        /* ── Sidebar ── */
         [data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #e9eef5 0%, #e3eaf3 100%);
-            border-right: 1px solid var(--line);
+            background: var(--surface) !important;
+            border-right: 1px solid var(--border);
         }
+
+        /* ── Tabs — flat pill style ── */
         div[data-testid="stTabs"] button {
-            border-radius: 999px;
-            padding: 0.5rem 1rem;
-            background: var(--panel);
-            color: var(--muted);
-            border: 0;
-            box-shadow: 7px 7px 16px var(--shadow-lo), -7px -7px 16px var(--shadow-hi);
+            border-radius: 999px !important;
+            padding: 0.35rem 1rem;
+            background: transparent !important;
+            color: var(--muted) !important;
+            border: 1.5px solid var(--border) !important;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.18s ease !important;
+            box-shadow: none !important;
         }
         div[data-testid="stTabs"] button[aria-selected="true"] {
-            background: linear-gradient(135deg, rgba(79, 125, 243, 0.16), rgba(121, 196, 183, 0.18));
-            color: var(--ink);
-            box-shadow: inset 4px 4px 8px rgba(175, 187, 203, 0.55), inset -4px -4px 8px rgba(255,255,255,0.85);
+            background: var(--accent) !important;
+            color: #ffffff !important;
+            border-color: var(--accent) !important;
+            box-shadow: var(--shadow-sm) !important;
         }
+        div[data-testid="stTabs"] button:hover:not([aria-selected="true"]) {
+            border-color: var(--accent) !important;
+            color: var(--accent) !important;
+        }
+
+        /* ── Metric Cards — clean flat ── */
         div[data-testid="stMetric"] {
-            background: var(--panel);
-            border: 1px solid transparent;
-            border-radius: 22px;
-            padding: 0.9rem 1rem;
-            box-shadow: 14px 14px 30px var(--shadow-lo), -14px -14px 30px var(--shadow-hi);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
         }
-        div[data-testid="stMetricLabel"], div[data-testid="stMetricValue"] {
-            color: var(--ink);
+        div[data-testid="stMetricLabel"] {
+            color: var(--muted) !important;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
+        div[data-testid="stMetricValue"] {
+            color: var(--ink) !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        div[data-testid="stMetricDelta"] {
+            font-size: 0.8rem;
+        }
+
+        /* ── Hero Banner ── */
         .hero-shell {
-            border: 1px solid rgba(255,255,255,0.55);
-            border-radius: 30px;
-            padding: 1.4rem 1.5rem;
-            background:
-                linear-gradient(145deg, #eef3f9 0%, #e2e9f2 100%);
-            box-shadow: 24px 24px 46px rgba(168, 180, 197, 0.78), -18px -18px 38px rgba(255,255,255,0.96);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            background: var(--surface);
+            box-shadow: var(--shadow-md);
             margin-bottom: 1rem;
         }
         .hero-kicker {
             color: var(--accent);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            letter-spacing: 0.16em;
-            font-size: 0.78rem;
-            margin-bottom: 0.55rem;
+            margin-bottom: 0.4rem;
         }
         .hero-title {
-            font-size: 2.1rem;
-            line-height: 1.15;
+            font-size: 1.75rem;
             font-weight: 800;
             color: var(--ink);
+            line-height: 1.2;
             margin-bottom: 0.5rem;
         }
         .hero-copy {
             color: var(--muted);
-            font-size: 1rem;
-            max-width: 62rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-width: 60rem;
         }
+
+        /* ── Pill Badges ── */
         .pill-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.6rem;
-            margin-top: 1rem;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
         }
         .pill {
-            border: 1px solid rgba(255,255,255,0.6);
-            background: var(--panel);
+            background: var(--bg);
+            border: 1px solid var(--border);
             border-radius: 999px;
-            padding: 0.45rem 0.8rem;
-            color: var(--ink);
-            font-size: 0.9rem;
-            box-shadow: 10px 10px 22px rgba(171, 183, 200, 0.72), -8px -8px 16px rgba(255,255,255,0.92);
+            padding: 0.3rem 0.75rem;
+            color: var(--muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.15s ease;
         }
+        .pill:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .pill strong {
+            color: var(--ink);
+        }
+
+        /* ── Panel Notes ── */
         .panel-note {
-            border: 1px solid rgba(255,255,255,0.65);
-            background: var(--panel);
-            border-radius: 24px;
-            padding: 1rem 1.1rem;
-            box-shadow: 18px 18px 36px rgba(169, 181, 198, 0.74), -14px -14px 28px rgba(255,255,255,0.94);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: var(--radius);
+            background: var(--surface);
+            padding: 0.85rem 1rem;
+            box-shadow: var(--shadow-sm);
         }
         .panel-note h4 {
-            margin: 0 0 0.35rem;
+            margin: 0 0 0.25rem;
             color: var(--ink);
+            font-size: 0.9rem;
+            font-weight: 700;
         }
         .panel-note p {
             margin: 0;
             color: var(--muted);
+            font-size: 0.85rem;
         }
+
+        /* ── Cards (st.container border=True) ── */
+        [data-testid="stHorizontalBlock"] > div > div > [data-testid="stVerticalBlock"] > div > div[style*="border"],
+        [data-testid="stHorizontalBlock"] [data-testid="stVerticalBlock"] > div > [style*="border"] {
+            background: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: var(--radius) !important;
+            box-shadow: var(--shadow-sm) !important;
+        }
+
+        /* ── Form Inputs — flat with bottom border accent ── */
         div[data-testid="stTextInputRoot"] > div,
         div[data-testid="stTextArea"] textarea,
-        div[data-testid="stSelectbox"] > div,
-        div[data-testid="stMultiSelect"] > div {
-            background: var(--panel) !important;
-            border-radius: 18px !important;
-            border: 1px solid rgba(255,255,255,0.6) !important;
-            box-shadow: inset 5px 5px 10px rgba(188, 199, 214, 0.65), inset -5px -5px 10px rgba(255,255,255,0.92) !important;
+        div[data-testid="stSelectbox"] > div {
+            background: var(--surface) !important;
+            border: 1.5px solid var(--border) !important;
+            border-radius: var(--radius) !important;
+            transition: border-color 0.15s ease !important;
         }
-        div[data-baseweb="select"] > div,
-        textarea, input {
+        div[data-testid="stTextInputRoot"]:has(input:focus) > div,
+        div[data-testid="stTextArea"]:has(textarea:focus) textarea,
+        div[data-testid="stSelectbox"]:has([aria-expanded="true"]) > div {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1) !important;
+        }
+        textarea, input, [data-baseweb="select"] input {
             color: var(--ink) !important;
+            font-size: 0.9rem !important;
         }
-        /* Phase 3.2: Buttons with smooth transitions */
+
+        /* ── Buttons — flat with accent fill ── */
         .stButton > button,
         .stDownloadButton > button {
-            border-radius: 18px !important;
-            border: 1px solid rgba(255,255,255,0.65) !important;
-            background: linear-gradient(145deg, #eef3f9 0%, #dfe7f1 100%) !important;
+            border-radius: var(--radius) !important;
+            border: none !important;
+            background: var(--surface) !important;
             color: var(--ink) !important;
-            box-shadow: 6px 6px 14px rgba(169, 181, 198, 0.65), -6px -6px 14px rgba(255,255,255,0.92) !important;
-            transition: box-shadow 0.2s ease, transform 0.15s ease !important;
+            font-weight: 600 !important;
+            font-size: 0.875rem !important;
+            box-shadow: var(--shadow-sm) !important;
+            transition: all 0.15s ease !important;
+            padding: 0.5rem 1rem !important;
         }
         .stButton > button:hover,
         .stDownloadButton > button:hover {
-            box-shadow: 10px 10px 22px rgba(169, 181, 198, 0.80), -8px -8px 18px rgba(255,255,255,0.96) !important;
+            box-shadow: var(--shadow-md) !important;
             transform: translateY(-1px);
+            filter: brightness(0.97);
         }
         .stButton > button:active,
         .stDownloadButton > button:active {
-            box-shadow: inset 3px 3px 8px rgba(169, 181, 198, 0.5), inset -3px -3px 8px rgba(255,255,255,0.8) !important;
+            box-shadow: var(--shadow-sm) !important;
             transform: translateY(0);
+            filter: brightness(0.95);
         }
         .stButton > button[kind="primary"] {
-            background: linear-gradient(135deg, rgba(79, 125, 243, 0.22), rgba(121, 196, 183, 0.24)) !important;
+            background: var(--accent) !important;
+            color: #ffffff !important;
         }
         .stButton > button[kind="primary"]:hover {
-            background: linear-gradient(135deg, rgba(79, 125, 243, 0.35), rgba(121, 196, 183, 0.35)) !important;
+            background: #2563eb !important;
         }
-        /* Phase 3.2: Reduce shadow — remove box-shadow from container elements
-           Keep shadow only on: metric cards, hero, pills (on hover), buttons (on hover) */
+        .stButton > button[kind="secondary"] {
+            background: var(--bg) !important;
+            color: var(--muted) !important;
+            border: 1.5px solid var(--border) !important;
+            box-shadow: none !important;
+        }
+
+        /* ── DataFrame — flat, clean rows ── */
         div[data-testid="stDataFrame"] {
-            border-radius: 24px !important;
-            background: var(--panel) !important;
-            border: 1px solid rgba(255,255,255,0.62) !important;
+            background: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: var(--radius) !important;
             overflow: hidden;
+            box-shadow: var(--shadow-sm);
         }
-        /* Alternating row colors for readability */
+        /* Row striping */
         div[data-testid="stDataFrame"] tbody tr:nth-child(even) td {
-            background: rgba(79, 125, 243, 0.04) !important;
+            background: #f8fafc !important;
         }
-        div[data-testid="stForm"],
+        div[data-testid="stDataFrame"] thead th {
+            background: var(--bg) !important;
+            color: var(--muted) !important;
+            font-weight: 700 !important;
+            font-size: 0.75rem !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--border) !important;
+        }
+        div[data-testid="stDataFrame"] tbody td {
+            color: var(--ink);
+            font-size: 0.875rem;
+        }
+
+        /* ── Expander ── */
         div[data-testid="stExpander"] {
-            border-radius: 20px !important;
-            background: var(--panel) !important;
-            border: 1px solid rgba(255,255,255,0.62) !important;
+            background: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: var(--radius) !important;
+            box-shadow: var(--shadow-sm);
         }
+        div[data-testid="stExpander"] details summary {
+            color: var(--ink) !important;
+            font-weight: 600;
+        }
+
+        /* ── Alerts / Info boxes ── */
         div[data-testid="stAlert"] {
-            border-radius: 18px !important;
-            box-shadow: 8px 8px 18px rgba(169, 181, 198, 0.35), -8px -8px 18px rgba(255,255,255,0.8) !important;
+            border-radius: var(--radius) !important;
+            border: none !important;
+            box-shadow: var(--shadow-sm) !important;
         }
+
+        /* ── Lift Card ── */
         .lift-card {
-            border-radius: 22px;
-            padding: 0.95rem 1rem;
-            background: linear-gradient(145deg, #eef3f9 0%, #e3eaf3 100%);
-            border: 1px solid rgba(255,255,255,0.7);
-            box-shadow: 16px 16px 30px rgba(170, 182, 198, 0.72), -12px -12px 24px rgba(255,255,255,0.94);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.9rem 1rem;
+            box-shadow: var(--shadow-sm);
         }
         .lift-card strong {
             color: var(--ink);
+            font-size: 1rem;
         }
         .lift-card span {
             color: var(--muted);
             display: block;
-            margin-bottom: 0.25rem;
-            font-size: 0.88rem;
+            margin-bottom: 0.2rem;
+            font-size: 0.8rem;
+        }
+
+        /* ── Selectbox dropdown ── */
+        [data-baseweb="popover"],
+        [data-baseweb="menu"] {
+            background: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: var(--radius) !important;
+            box-shadow: var(--shadow-lg) !important;
+        }
+        [data-baseweb="option"] {
+            border-radius: 6px !important;
+            font-size: 0.875rem !important;
+        }
+        [data-baseweb="option"]:hover,
+        [data-baseweb="option"]:focus {
+            background: var(--bg) !important;
+        }
+
+        /* ── Progress bar ── */
+        [data-testid="stProgressBar"] > div > div {
+            background: var(--accent) !important;
+            border-radius: 999px;
+        }
+
+        /* ── Subheaders ── */
+        .stMarkdownContainer h1,
+        .stMarkdownContainer h2,
+        .stMarkdownContainer h3 {
+            color: var(--ink);
         }
         </style>
         """,

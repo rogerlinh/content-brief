@@ -48,4 +48,18 @@ jobs:
           python -m py_compile modules/content_brief_builder.py
           python -m py_compile modules/markdown_exporter.py
           python -m py_compile modules/project_manager.py
+          python -m py_compile modules/article_writer.py
+          python -m py_compile modules/intent.py
+          python -m py_compile modules/llm_utils.py
+          python -m py_compile modules/prompts/__init__.py
+          python -m py_compile modules/prompts/koray_core_rules.py
           echo "All syntax checks passed"
+
+      - name: Verify imports work
+        run: |
+          python -c "
+            from modules.intent import detect_intent, normalize_intent, get_h2_minimum
+            from modules.llm_utils import call_llm_with_retry, LLM_DEFAULTS
+            from modules.prompts.koray_core_rules import KORAY_8_RULES
+            print('All imports OK')
+          "
