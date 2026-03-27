@@ -82,6 +82,12 @@ class ProjectManager:
         self.db_path = db_path or DB_PATH
         self._init_db()
 
+    def _connect(self) -> sqlite3.Connection:
+        """Tạo kết nối SQLite với row_factory để tránh lỗi lệch index cột."""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
+
     def _init_db(self):
         """Khởi tạo bảng projects nếu chưa có."""
         try:
@@ -99,37 +105,46 @@ class ProjectManager:
         except Exception as e:
             logger.error("[PM] Lỗi khởi tạo DB: %s", e)
 
-    def _row_to_project(self, row: tuple) -> Project:
-        """Convert SQLite row tuple thành Project dataclass."""
+    def _normalize_domain(self, domain: str) -> str:
+        """Chuẩn hóa domain để không lưu cả protocol/path trong DB."""
+        if not domain:
+            return ""
+        cleaned = str(domain).strip()
+        cleaned = cleaned.replace("https://", "").replace("http://", "")
+        cleaned = cleaned.split("/", 1)[0].strip()
+        return cleaned
+
+    def _row_to_project(self, row) -> Project:
+        """Convert SQLite row thành Project dataclass."""
         return Project(
-            id=row[0],
-            name=row[1] or "",
-            brand_name=row[2] or "",
-            domain=row[3] or "",
-            company_full_name=row[4] or "",
-            industry=row[5] or "",
-            main_products=row[6] or "",
-            usp=row[7] or "",
-            target_customers=row[8] or "",
-            competitor_brands=row[9] or "",
-            tone=row[10] or "",
-            technical_standards=row[11] or "",
-            geo_keywords=row[12] or "",
-            hotline=row[13] or "",
-            email=row[14] or "",
-            address=row[15] or "",
-            warehouse=row[16] or "",
-            topical_map_csv=row[17] or "",
-            created_at=row[18] or "",
-            updated_at=row[19] or "",
-            is_active=bool(row[20]),
+            id=row["id"],
+            name=row["name"] or "",
+            brand_name=row["brand_name"] or "",
+            domain=self._normalize_domain(row["domain"] or ""),
+            company_full_name=row["company_full_name"] or "",
+            industry=row["industry"] or "",
+            main_products=row["main_products"] or "",
+            usp=row["usp"] or "",
+            target_customers=row["target_customers"] or "",
+            competitor_brands=row["competitor_brands"] or "",
+            tone=row["tone"] or "",
+            technical_standards=row["technical_standards"] or "",
+            geo_keywords=row["geo_keywords"] or "",
+            hotline=row["hotline"] or "",
+            email=row["email"] or "",
+            address=row["address"] or "",
+            warehouse=row["warehouse"] or "",
+            topical_map_csv=row["topical_map_csv"] or "",
+            created_at=row["created_at"] or "",
+            updated_at=row["updated_at"] or "",
+            is_active=bool(row["is_active"]),
         )
 
     def create(self, data: dict) -> Optional[Project]:
         """Tạo project mới. Trả về Project vừa tạo."""
         now = datetime.now().isoformat()
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._connect() as conn:
                 cur = conn.execute(
                     """
                     INSERT INTO projects (
@@ -143,7 +158,7 @@ class ProjectManager:
                     (
                         data.get("name", ""),
                         data.get("brand_name", ""),
-                        data.get("domain", ""),
+                        self._normalize_domain(data.get("domain", "")),
                         data.get("company_full_name", ""),
                         data.get("industry", ""),
                         data.get("main_products", ""),
@@ -170,7 +185,7 @@ class ProjectManager:
     def get_all(self) -> List[Project]:
         """Lấy tất cả projects."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._connect() as conn:
                 rows = conn.execute(
                     "SELECT * FROM projects ORDER BY is_active DESC, id DESC"
                 ).fetchall()
@@ -182,7 +197,7 @@ class ProjectManager:
     def get_by_id(self, project_id: int) -> Optional[Project]:
         """Lấy project theo ID."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._connect() as conn:
                 row = conn.execute(
                     "SELECT * FROM projects WHERE id=?", (project_id,)
                 ).fetchone()
@@ -194,7 +209,7 @@ class ProjectManager:
     def get_active(self) -> Optional[Project]:
         """Lấy project đang active (is_active=1)."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._connect() as conn:
                 row = conn.execute(
                     "SELECT * FROM projects WHERE is_active=1 LIMIT 1"
                 ).fetchone()
@@ -206,7 +221,7 @@ class ProjectManager:
     def set_active(self, project_id: int):
         """Set project active, bỏ active tất cả project khác."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._connect() as conn:
                 conn.execute("UPDATE projects SET is_active=0")
                 conn.execute(
                     "UPDATE projects SET is_active=1, updated_at=? WHERE id=?",
@@ -221,7 +236,7 @@ class ProjectManager:
         """Cập nhật project."""
         now = datetime.now().isoformat()
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._connect() as conn:
                 conn.execute(
                     """
                     UPDATE projects SET
@@ -235,7 +250,7 @@ class ProjectManager:
                     (
                         data.get("name", ""),
                         data.get("brand_name", ""),
-                        data.get("domain", ""),
+                        self._normalize_domain(data.get("domain", "")),
                         data.get("company_full_name", ""),
                         data.get("industry", ""),
                         data.get("main_products", ""),
@@ -263,7 +278,7 @@ class ProjectManager:
     def delete(self, project_id: int):
         """Xóa project."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._connect() as conn:
                 conn.execute("DELETE FROM projects WHERE id=?", (project_id,))
                 conn.commit()
             logger.info("[PM] Đã xóa project_id=%d", project_id)

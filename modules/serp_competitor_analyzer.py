@@ -468,97 +468,12 @@ async def _extract_related_searches(page) -> List[str]:
 
 async def _scrape_competitors(urls: List[str], headless: bool) -> List[Dict]:
     """
-    Scrape nội dung từ top đối thủ bằng Playwright (async).
+    Scrape noi dung tu top doi thu.
 
-    Returns:
-        List of competitor data dicts.
+    Streamlit Cloud khong co browser/Playwright san, nen dung fallback nhe
+    de giu pipeline on dinh va de deploy.
     """
     return _scrape_competitors_with_requests(urls)
-
-    """
-    try:
-        from playwright.async_api import async_playwright
-    except ImportError:
-        logger.warning(
-            "  [COMPETITOR] Playwright khong co san. Fallback sang requests + BeautifulSoup."
-        )
-        return _scrape_competitors_with_requests(urls)
-
-    competitors = []
-
-    try:
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=headless)
-            context = await browser.new_context(
-                locale="vi-VN",
-                user_agent=(
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/131.0.0.0 Safari/537.36"
-                ),
-            )
-
-        for i, url in enumerate(urls[:MAX_COMPETITORS]):
-            logger.info("  [COMPETITOR %d/%d] Truy cập: %s",
-                        i + 1, len(urls), url[:80])
-            try:
-                page = await context.new_page()
-                await page.goto(url, timeout=PAGE_TIMEOUT_MS,
-                                wait_until="domcontentloaded")
-                await page.wait_for_timeout(2000)
-
-                # Trích xuất headings
-                headings = await _extract_page_headings(page)
-
-                # Trích xuất body text
-                body_text = await _extract_body_text(page)
-
-                # Tính n-grams cho competitor này
-                ngrams_2 = _compute_ngrams(body_text, n=2)
-                ngrams_3 = _compute_ngrams(body_text, n=3)
-
-                competitors.append({
-                    "url": url,
-                    "headings": headings,
-                    "body_text": body_text,
-                    "word_count": len(body_text.split()),
-                    "ngrams_2": ngrams_2[:20],
-                    "ngrams_3": ngrams_3[:20],
-                })
-
-                logger.info("  [COMPETITOR %d/%d] → %d headings, %d words",
-                            i + 1, len(urls), len(headings),
-                            len(body_text.split()))
-
-                await page.close()
-
-                # Delay giữa các request
-                if i < len(urls) - 1:
-                    await asyncio.sleep(REQUEST_DELAY_SECONDS)
-
-            except Exception as e:
-                logger.warning("  [COMPETITOR %d/%d] Lỗi: %s",
-                               i + 1, len(urls), str(e))
-                competitors.append({
-                    "url": url,
-                    "headings": [],
-                    "body_text": "",
-                    "word_count": 0,
-                    "ngrams_2": [],
-                    "ngrams_3": [],
-                    "error": str(e),
-                })
-
-            await browser.close()
-    except Exception as e:
-        logger.warning(
-            "  [COMPETITOR] Playwright launch that bai (%s). Fallback sang requests + BeautifulSoup.",
-            str(e),
-        )
-        return _scrape_competitors_with_requests(urls)
-
-    return competitors
-    """
 
 
 def _scrape_competitors_with_requests(urls: List[str]) -> List[Dict]:
