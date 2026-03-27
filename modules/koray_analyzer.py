@@ -342,27 +342,15 @@ def calculate_quality_score(brief: Dict, headings: List[Dict], project=None) -> 
     # ══════════════════════════════════════════
     # STRUCTURAL FAILURE GATE
     # Cap điểm tổng nếu H2 không đủ cho intent
+    # Phase 2.2: Use centralized intent module
     # ══════════════════════════════════════════
-    INTENT_H2_MINIMUMS = {
-        # V17: 4 loại chuẩn
-        "informational": 4,
-        "commercial": 5,
-        "transactional": 3,
-        "navigational": 2,
-        # Backward compat
-        "vs": 5, "comparison": 5,
-        "what-is": 4, "how-to": 4,
-        "general": 3,
-    }
-    STRUCTURAL_CAPS = {
-        0: 10, 1: 20, 2: 35, 3: 55, 4: 70,
-    }
+    from modules.intent import get_h2_minimum
     detected_intent = brief.get("search_intent", {})
     if isinstance(detected_intent, dict):
         detected_intent = detected_intent.get("type", "informational").lower()
     else:
         detected_intent = str(detected_intent).lower()
-    min_h2_required = INTENT_H2_MINIMUMS.get(detected_intent, 3)
+    min_h2_required = get_h2_minimum(detected_intent)
     structural_cap = STRUCTURAL_CAPS.get(h2_count, 100)  # ≥5 H2 = không bị cap
 
     if h2_count < min_h2_required:
@@ -446,17 +434,24 @@ def _get_openai_client(api_key: str):
 
 def _call_llm(client, model: str, system: str, user: str, max_tokens: int = 1500) -> str:
     """Helper gọi LLM và trả về text. Throw exception nếu thất bại."""
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
-        temperature=0.3,
-        max_tokens=max_tokens,
-        timeout=60,
-    )
-    return response.choices[0].message.content.strip()
+    # Phase 2.3: Use llm_utils for exponential backoff retry
+    from modules.llm_utils import call_llm_with_retry, LLM_DEFAULTS
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ]
+    try:
+        return call_llm_with_retry(
+            client=client,
+            model=model,
+            messages=messages,
+            temperature=LLM_DEFAULTS["temperature_seo"],  # 0.3
+            max_tokens=max_tokens,
+            timeout=LLM_DEFAULTS["timeout"],              # 60s
+        )
+    except Exception as exc:
+        logger.warning("[KorayAnalyzer._call_llm] LLM call failed (returning empty): %s", exc)
+        return ""
 
 
 def generate_macro_context(

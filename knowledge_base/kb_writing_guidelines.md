@@ -717,5 +717,99 @@ Use unique Image & signal
 Fight content decay ==> always update your content, even they performing good.
 Focus on information gap ⇒ note search demand.
 
+---
+
+## KORAY 12 WRITING RULES (BẮT BUỘC ÁP DỤNG TRONG MỌI BRIEF)
+
+### R1: Proper Word Sequence
+Viết attribute quan trọng lên đầu câu. Ngữ cảnh quyết định nghĩa.
+- ❌ "Trong xây dựng kết cấu, thép thanh vằn được dùng phổ biến"
+- ✅ "Thép thanh vằn được dùng phổ biến trong xây dựng kết cấu cầu, nhà xưởng, cơ sở hạ tầng"
+
+### R2: Factual Certainty
+Tránh "sẽ", "nên", "có thể". Dùng present tense, definite language.
+- ❌ "Thép này sẽ bền theo thời gian"
+- ✅ "Thép thanh vằn được thiết kế cho tuổi thọ 50+ năm trong môi trường biển"
+
+### R3: Eliminate Fluff
+- ❌ "Đây là điều không thể phủ nhận rằng để đạt thành công"
+- ✅ "Kiên trì là chìa khóa thành công trong xây dựng kết cấu thép"
+
+### R4: Numeric Values
+Luôn dùng số cụ dụng: MPa, mm, kg, %, JIS, ASTM, TCVN — không "nhiều", "lớn".
+- ❌ "Thép này có nhiều ưu điểm vượt trội"
+- ✅ "Thép này có 5 ưu điểm: bền cao (490 MPa), chống gỉ, nhẹ hơn 30%, dễ gia công, giá cạnh tranh"
+
+### R5: Qualify Instances
+Chỉ rõ mức độ, loại, số lượng.
+- ❌ "Các tiêu chuẩn thép phổ biến"
+- ✅ "Các tiêu chuẩn phổ biến: JIS G3506 (Nhật Bản), TCVN 1651 (Việt Nam), ASTM A36 (Mỹ)"
+
+### R6: Contextual Verbs
+Dùng động từ đúng ngữ cảnh ngành:
+- Kỹ thuật xây dựng → "thiết kế cho", "chịu lực", "chịu kéo", "chịu ăn mòn"
+- Kinh doanh/phân phối → "cung cấp", "phân phối", "báo giá"
+
+### R7: Examples After Plural Nouns
+Sau danh từ số nhiều phải có ít nhất 3 ví dụ cụ thể.
+
+### R8: Parallel Structure in Lists
+Trong danh sách: cùng loại từ (tất cả là danh từ HOẶC tất cả là động từ.
+
+### R9: Optimize First Sentence Under Heading
+Câu đầu tiên phải trả lời trực tiếp heading. Không có prelude.
+
+### R10: Answer Directness
+Trả lời ngay. Không có "Trong bài viết này", "Chúng ta sẽ tìm hiểu"
+
+### R11: Anchor Text Context
+Trước internal link: nhắc keyword 1-5 lần với ngữ cảnh rõ ràng.
+
+### R12: Do Not Delay Answer — Bold câu trả lời chính, không phải keyword trong FAQ.
+
+---
+
+## KORAY MINDSHARE MODEL — CẤU TRÚC DÀN Ý BẮT BUỘC
+
+```
+[MAIN] Định nghĩa / Tổng quan
+[MAIN] Đặc điểm kỹ thuật / Phân loại
+[MAIN] Ứng dụng / So sánh
+[SUPP] FAQ (từ PAA Google)
+[SUPP] Kết luận / Lưu ý / Antonym Ending
+```
+
+**Tỷ lệ:** [MAIN] = 65-80% | [SUPP] = 20-35% tổng số H2
+
+**SAPO (Supplementary Angle Paragraph Opening):** Mỗi [MAIN] section mở bằng đoạn ≥80 từ:
+Định nghĩa → Thuộc tính → Ứng dụng → Brand context tự nhiên.
+
+---
+
+## EAV TABLE — BẮT BUỘC CHO MỌI BRIEF THÉP XÂY DỰNG
+
+| Entity | Attribute | Value Example |
+|---|---|---|
+| Thép thanh vằn | Loại mác | SB490, SD295, SD390 |
+| Thép thanh vằn | Tiêu chuẩn | JIS G3506, TCVN 1651 |
+| Thép thanh vằn | Ứng dụng | Xây dựng, cơ sở hạ tầng |
+| Thép thanh vằn | Điểm bán | Phân phối toàn miền Bắc |
+
+**3-Pillar Attribute Filtration:**
+1. **Prominence** = bắt buộc phải có trong mọi brief
+2. **Popularity** = theo search volume và nhu cầu thị trường
+3. **Relevance** = phải phù hợp với Source Context của brand
+
+---
+
+## GEO / AI OVERVIEW OPTIMIZATION
+
+- Heading H2/H3 ngắn gọn, trả lời trực tiếp câu hỏi người dùng
+- Câu đầu mỗi đoạn ≤20 từ
+- FAQ schema markup để AI citations cao
+- Số liệu cụ thể (MPa, mm, kg, %, JIS, TCVN) — không "nhiều", "lớn"
+- Bold câu trả lời chính trong FAQ, không bold keyword
+- Internal link có context justification rõ ràng
+
 
 

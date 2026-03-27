@@ -163,21 +163,48 @@ def inject_ui_css() -> None:
         textarea, input {
             color: var(--ink) !important;
         }
+        /* Phase 3.2: Buttons with smooth transitions */
         .stButton > button,
         .stDownloadButton > button {
             border-radius: 18px !important;
             border: 1px solid rgba(255,255,255,0.65) !important;
             background: linear-gradient(145deg, #eef3f9 0%, #dfe7f1 100%) !important;
             color: var(--ink) !important;
-            box-shadow: 13px 13px 24px rgba(169, 181, 198, 0.82), -10px -10px 20px rgba(255,255,255,0.96) !important;
+            box-shadow: 6px 6px 14px rgba(169, 181, 198, 0.65), -6px -6px 14px rgba(255,255,255,0.92) !important;
+            transition: box-shadow 0.2s ease, transform 0.15s ease !important;
+        }
+        .stButton > button:hover,
+        .stDownloadButton > button:hover {
+            box-shadow: 10px 10px 22px rgba(169, 181, 198, 0.80), -8px -8px 18px rgba(255,255,255,0.96) !important;
+            transform: translateY(-1px);
+        }
+        .stButton > button:active,
+        .stDownloadButton > button:active {
+            box-shadow: inset 3px 3px 8px rgba(169, 181, 198, 0.5), inset -3px -3px 8px rgba(255,255,255,0.8) !important;
+            transform: translateY(0);
         }
         .stButton > button[kind="primary"] {
             background: linear-gradient(135deg, rgba(79, 125, 243, 0.22), rgba(121, 196, 183, 0.24)) !important;
         }
-        div[data-testid="stDataFrame"], div[data-testid="stForm"], div[data-testid="stExpander"] {
+        .stButton > button[kind="primary"]:hover {
+            background: linear-gradient(135deg, rgba(79, 125, 243, 0.35), rgba(121, 196, 183, 0.35)) !important;
+        }
+        /* Phase 3.2: Reduce shadow — remove box-shadow from container elements
+           Keep shadow only on: metric cards, hero, pills (on hover), buttons (on hover) */
+        div[data-testid="stDataFrame"] {
             border-radius: 24px !important;
             background: var(--panel) !important;
-            box-shadow: 18px 18px 36px rgba(170, 182, 198, 0.74), -14px -14px 28px rgba(255,255,255,0.95) !important;
+            border: 1px solid rgba(255,255,255,0.62) !important;
+            overflow: hidden;
+        }
+        /* Alternating row colors for readability */
+        div[data-testid="stDataFrame"] tbody tr:nth-child(even) td {
+            background: rgba(79, 125, 243, 0.04) !important;
+        }
+        div[data-testid="stForm"],
+        div[data-testid="stExpander"] {
+            border-radius: 20px !important;
+            background: var(--panel) !important;
             border: 1px solid rgba(255,255,255,0.62) !important;
         }
         div[data-testid="stAlert"] {
@@ -382,7 +409,9 @@ def build_job_payload(
     methodology: str,
     active_project,
 ) -> dict:
+    # Phase 4.1: Include schema version for worker validation
     return {
+        "schema_version": 1,
         "keywords": keywords,
         "creds_path": CREDS_PATH if os.path.exists(CREDS_PATH) else None,
         "sheet_url": sheet_url,
@@ -403,16 +432,46 @@ def write_job_payload(job_data: dict) -> None:
         json.dump(job_data, file, ensure_ascii=False, indent=2)
 
 
+def _is_process_alive(pid: int) -> bool:
+    """Kiểm tra PID còn sống không (cross-platform)."""
+    try:
+        if os.name == "nt":
+            # Windows: dùng tasklist kiểm tra PID tồn tại
+            result = subprocess.run(
+                ["tasklist", "/FI", f"PID eq {pid}"],
+                capture_output=True, text=True, timeout=5,
+            )
+            return str(pid) in result.stdout
+        else:
+            # Unix: gửi signal 0 → không kill, chỉ kiểm tra
+            os.kill(pid, 0)
+            return True
+    except (ProcessLookupError, PermissionError, OSError, subprocess.TimeoutExpired):
+        return False
+
+
 def start_local_worker() -> None:
+    # Phase 1.2: Validate stale lock — nếu lock file tồn tại nhưng PID đã chết → xóa
+    if os.path.exists(LOCK_FILE):
+        with open(LOCK_FILE, "r", encoding="utf-8", errors="ignore") as f:
+            stored_pid = f.read().strip()
+        if stored_pid and stored_pid != "STARTING" and stored_pid.isdigit():
+            if not _is_process_alive(int(stored_pid)):
+                try:
+                    os.remove(LOCK_FILE)
+                except OSError:
+                    pass
+
     error_file = open(ERROR_LOG_PATH, "w", encoding="utf-8")
-    subprocess.Popen(
+    proc = subprocess.Popen(
         [sys.executable, "-u", "worker.py"],
         cwd=BASE_DIR,
         stdout=error_file,
         stderr=error_file,
     )
+    # Phase 1.2: Ghi PID thật sau khi xác nhận Popen thành công
     with open(LOCK_FILE, "w", encoding="utf-8") as file:
-        file.write("STARTING")
+        file.write(str(proc.pid))
 
 
 def stop_local_worker() -> None:
@@ -567,8 +626,16 @@ def render_sidebar(active_project, worker_running: bool, metrics: dict) -> None:
         st.markdown("### Điều hướng nhanh")
         st.caption("Ưu tiên thao tác trong các tab bên dưới. Sidebar chỉ giữ phần tổng quan.")
         st.metric("Chế độ", "Cloud" if IS_CLOUD else "Local")
-        st.metric("Trạng thái", "Đang chạy" if worker_running or st.session_state.batch_running else "Rảnh")
+        # Phase 3.4: Add Running metric + 3-state color-coded status
+        if worker_running:
+            status_label = "🟢 Worker local đang chạy"
+        elif st.session_state.batch_running:
+            status_label = "🔵 Cloud batch đang xử lý"
+        else:
+            status_label = "⚪ Rảnh"
+        st.metric("Trạng thái", status_label)
         st.metric("Done", metrics["done"])
+        st.metric("Running", metrics["running"])   # Phase 3.4: was missing
         st.metric("Error", metrics["error"])
 
         if active_project:
@@ -639,11 +706,28 @@ def render_generate_tab(active_project, worker_running: bool) -> str:
             st.subheader("2. Thiết lập pipeline")
             settings_col1, settings_col2 = st.columns(2)
             with settings_col1:
-                enable_serp = st.checkbox("SERP + Competitor", value=True)
-                enable_network = st.checkbox("Semantic Network", value=True)
+                # Phase 3.3: Tooltips cho pipeline checkboxes
+                enable_serp = st.checkbox(
+                    "🔍 SERP + Phân tích đối thủ",
+                    value=True,
+                    help="Bật: crawl Google SERP + phân tích HTML top đối thủ để trích xuất heading, n-gram, content gaps.",
+                )
+                enable_network = st.checkbox(
+                    "🌐 Semantic Query Network",
+                    value=True,
+                    help="Bật: LLM cluster keywords xung quanh central entity → xây dựng topical map cho website.",
+                )
             with settings_col2:
-                enable_context = st.checkbox("Context Builder", value=False)
-                enable_linking = st.checkbox("Internal Linking", value=True)
+                enable_context = st.checkbox(
+                    "📋 Context Builder",
+                    value=False,
+                    help="Bật: LLM sinh Context Vectors + Structure Outline từ dữ liệu đối thủ (cần SERP bật trước).",
+                )
+                enable_linking = st.checkbox(
+                    "🔗 Internal Linking",
+                    value=True,
+                    help="Bật: gợi ý internal links từ topical map — tăng crawl budget và topical authority.",
+                )
 
             methodology = st.selectbox(
                 "Methodology",
@@ -738,8 +822,14 @@ def render_generate_tab(active_project, worker_running: bool) -> str:
 
             total_batch = len(st.session_state.batch_keywords)
             current_idx = st.session_state.batch_idx
-            progress = (current_idx / total_batch) if total_batch else 0.0
-            st.progress(progress)
+            # Phase 1.5 fix: chỉ hiện progress bar khi đang chạy batch, không khi idle (0%)
+            # Phase 3.3: Step indicator với mô tả tiến trình
+            if st.session_state.batch_running or worker_running:
+                progress = (current_idx / total_batch) if total_batch else 0.0
+                st.progress(progress)
+                # Phase 3.3: Hiện step + keyword đang xử lý
+                step_label = f"[{current_idx}/{total_batch}] {st.session_state.batch_current_keyword or 'Đang chuẩn bị...'}"
+                st.caption(step_label)
 
             if st.session_state.batch_running and IS_CLOUD:
                 current_kw = st.session_state.batch_current_keyword or "Đang chuẩn bị keyword tiếp theo"
@@ -782,12 +872,38 @@ def render_results_tab(df_db: pd.DataFrame) -> None:
     m4.metric("Error", metrics["error"])
 
     if df_db.empty:
+        # Phase 1.6 fix: Empty state với CTA
         st.info("Chưa có dữ liệu trong database.")
+        st.caption("👉 Vào tab **'Tạo brief'** để chạy batch đầu tiên, hoặc upload file CSV keyword.")
         if st.session_state.batch_results:
             st.dataframe(pd.DataFrame(st.session_state.batch_results), use_container_width=True, hide_index=True)
         return
 
-    display_df = df_db.drop(
+    # Phase 1.6: Search + filter controls
+    filter_col1, filter_col2 = st.columns([2, 1])
+    with filter_col1:
+        search_term = st.text_input(
+            "🔍 Tìm keyword...",
+            placeholder="VD: thép tấm, giá thép,...",
+            key="result_search",
+        )
+    with filter_col2:
+        status_options = ["Tất cả", "Done", "Running", "Error"]
+        status_filter = st.selectbox("Lọc trạng thái", status_options, key="result_status_filter")
+
+    # Apply filters
+    filtered_df = df_db.copy()
+    if search_term:
+        filtered_df = filtered_df[
+            filtered_df["Keyword"].str.contains(search_term, case=False, na=False)
+        ]
+    if status_filter != "Tất cả":
+        filtered_df = filtered_df[
+            filtered_df["Trạng thái"].str.contains(status_filter, case=False, na=False)
+        ]
+
+    st.caption(f"Hiển thị {len(filtered_df)} / {len(df_db)} bản ghi")
+    display_df = filtered_df.drop(
         columns=[
             "Full Content Brief",
             "Báo cáo phân tích dữ liệu",
@@ -801,19 +917,36 @@ def render_results_tab(df_db: pd.DataFrame) -> None:
     )
     st.dataframe(display_df, use_container_width=True, height=360)
 
-    options = list(reversed(df_db.index.tolist()))
+    # Phase 1.6 fix: Precompute label_map to avoid O(n) df.at[] on every render
+    options = list(reversed(filtered_df.index.tolist()))
+    label_map = {
+        idx: f"{filtered_df.at[idx, 'Keyword']} | {filtered_df.at[idx, 'Trạng thái']}"
+        for idx in options
+    }
     selected_idx = st.selectbox(
         "Chọn bản ghi để xem chi tiết",
         options=options,
-        format_func=lambda idx: f"{df_db.at[idx, 'Keyword']} | {df_db.at[idx, 'Trạng thái']}",
+        format_func=lambda idx: label_map.get(idx, "—"),
     )
-    selected_row = df_db.loc[selected_idx]
+    selected_row = filtered_df.loc[selected_idx]
 
     detail_tabs = st.tabs(["Brief", "Phân tích", "Koray", "Tóm tắt"])
 
     with detail_tabs[0]:
         content = str(selected_row.get("Full Content Brief", "") or "")
         if content and content != "nan":
+            # Phase 3.5: Add export action buttons
+            action_cols = st.columns([1, 1])
+            with action_cols[0]:
+                st.download_button(
+                    "📥 Download .md",
+                    data=content.encode("utf-8"),
+                    file_name=f"brief_{selected_row.get('Keyword', 'untitled')}.md",
+                    mime="text/markdown",
+                    use_container_width=True,
+                    key="dl_brief_btn",
+                )
+            st.markdown("---")
             st.markdown(content)
         else:
             st.info("Bản ghi này chưa có brief.")
@@ -855,86 +988,131 @@ def render_results_tab(df_db: pd.DataFrame) -> None:
 
 
 def render_project_form(pm: ProjectManager) -> None:
+    """
+    Phase 3.1: Project form dùng st.dialog() (Streamlit 1.32+)
+    với 3 tab để giảm phức tạp (17 fields → 3 groups).
+    """
+    # Use st.dialog for clean modal (available in Streamlit 1.27+)
+    try:
+        _dialog = st.dialog
+    except AttributeError:
+        # Fallback: dùng st.form cho Streamlit cũ hơn
+        _dialog = None
+
     edit_id = st.session_state.get("edit_project_id")
     project = pm.get_by_id(edit_id) if edit_id else None
     values = project_to_dict(project)
-
     title = f"Sửa project: {project.name}" if project else "Tạo project mới"
-    with st.container(border=True):
-        st.subheader(title)
-        with st.form("project_form"):
-            col1, col2 = st.columns(2)
-            with col1:
-                name = st.text_input("Tên project *", value=values["name"])
-                brand_name = st.text_input("Brand name *", value=values["brand_name"])
-                domain = st.text_input("Domain *", value=values["domain"], placeholder="example.com")
-                industry = st.text_input("Ngành / lĩnh vực", value=values["industry"])
-                target_customers = st.text_input("Khách hàng mục tiêu", value=values["target_customers"])
-                tone = st.text_input("Tone & giọng văn", value=values["tone"])
-                geo_keywords = st.text_input("GEO keywords", value=values["geo_keywords"])
-            with col2:
-                company_full_name = st.text_input("Tên công ty đầy đủ", value=values["company_full_name"])
-                hotline = st.text_input("Hotline / Zalo", value=values["hotline"])
-                email = st.text_input("Email", value=values["email"])
-                address = st.text_input("Địa chỉ", value=values["address"])
-                warehouse = st.text_input("Kho / chi nhánh", value=values["warehouse"])
-                technical_standards = st.text_input(
-                    "Tiêu chuẩn kỹ thuật", value=values["technical_standards"]
-                )
 
-            main_products = st.text_area(
-                "Sản phẩm chính",
-                value=values["main_products"],
-                height=100,
-                placeholder="Mỗi dòng 1 sản phẩm hoặc 1 nhóm sản phẩm",
-            )
-            usp = st.text_area("USP / Lợi thế cạnh tranh", value=values["usp"], height=90)
-            competitor_brands = st.text_area(
-                "Brand đối thủ cần tránh làm H2 main",
-                value=values["competitor_brands"],
-                height=70,
-            )
+    if _dialog is not None:
+        with _dialog(title, width="large"):
+            _render_project_form_body(pm, edit_id, values, title)
+    else:
+        with st.container(border=True):
+            st.subheader(title)
+            _render_project_form_body(pm, edit_id, values, title)
 
-            action1, action2 = st.columns([1.4, 1])
-            save_project = action1.form_submit_button("Lưu project", type="primary", use_container_width=True)
-            cancel_project = action2.form_submit_button("Hủy", use_container_width=True)
 
-        if cancel_project:
+def _render_project_form_body(pm: ProjectManager, edit_id, values: dict, title: str) -> None:
+    """Helper: nội dung form project — dùng chung cho dialog và container fallback."""
+    st.caption("Các trường đánh dấu * là bắt buộc. Tab 1 → 2 → 3 rồi Lưu.")
+    # Phase 3.1: 3-tab layout (không dùng st.form trong dialog để tránh conflict)
+    tab1, tab2, tab3 = st.tabs([
+        "📋 Thông tin cơ bản",
+        "🏷️ Thương hiệu & Tone",
+        "📍 NAP & Địa điểm",
+    ])
+
+    with tab1:
+        st.markdown("**Thông tin nhận diện**")
+        name = st.text_input("Tên project *", value=values["name"])
+        brand_name = st.text_input("Brand name *", value=values["brand_name"])
+        domain = st.text_input("Domain *", value=values["domain"], placeholder="example.com")
+        company_full_name = st.text_input("Tên công ty đầy đủ", value=values["company_full_name"])
+        industry = st.text_input("Ngành / lĩnh vực", value=values["industry"])
+
+        st.markdown("**Sản phẩm & Khách hàng**")
+        main_products = st.text_area(
+            "Sản phẩm chính *",
+            value=values["main_products"],
+            height=100,
+            placeholder="Mỗi dòng 1 sản phẩm hoặc 1 nhóm sản phẩm",
+        )
+        target_customers = st.text_input("Khách hàng mục tiêu", value=values["target_customers"])
+
+    with tab2:
+        st.markdown("**Định vị thương hiệu**")
+        usp = st.text_area("USP / Lợi thế cạnh tranh *", value=values["usp"], height=90)
+        tone = st.text_input("Tone & giọng văn", value=values["tone"])
+        competitor_brands = st.text_area(
+            "Brand đối thủ (không đặt làm H2 độc lập)",
+            value=values["competitor_brands"],
+            height=70,
+            help="Liệt kê tên brand đối thủ cạnh tranh — hệ thống sẽ tránh đặt chúng làm H2 Main trong brief.",
+        )
+        technical_standards = st.text_input(
+            "Tiêu chuẩn kỹ thuật",
+            value=values["technical_standards"],
+            placeholder="VD: ASTM A36, JIS G3101, TCVN 1651",
+        )
+
+    with tab3:
+        st.markdown("**Thông tin liên hệ (NAP)**")
+        col_nap1, col_nap2 = st.columns(2)
+        with col_nap1:
+            hotline = st.text_input("Hotline / Zalo", value=values["hotline"])
+            email = st.text_input("Email", value=values["email"])
+        with col_nap2:
+            address = st.text_input("Địa chỉ trụ sở", value=values["address"])
+            warehouse = st.text_input("Kho / Chi nhánh", value=values["warehouse"])
+        geo_keywords = st.text_input(
+            "GEO keywords",
+            value=values["geo_keywords"],
+            placeholder="VD: Hà Nội, Miền Bắc, Đông Nam Bộ",
+            help="Các từ khóa địa lý mà brand phục vụ — ảnh hưởng đến nội dung brief.",
+        )
+
+    st.markdown("---")
+    action1, action2 = st.columns([1.4, 1])
+    save_project = action1.button("💾 Lưu project", type="primary", use_container_width=True)
+    cancel_project = action2.button("Hủy", use_container_width=True)
+
+    if cancel_project:
+        st.session_state.show_project_form = False
+        st.session_state.edit_project_id = None
+        st.rerun()
+
+    if save_project:
+        if not name.strip() or not brand_name.strip() or not domain.strip() or not main_products.strip():
+            st.error("Cần điền đủ: Tên project, Brand name, Domain và Sản phẩm chính.")
+        else:
+            payload = {
+                "name": name.strip(),
+                "brand_name": brand_name.strip(),
+                "domain": domain.strip(),
+                "company_full_name": company_full_name.strip(),
+                "industry": industry.strip(),
+                "main_products": main_products.strip(),
+                "usp": usp.strip(),
+                "target_customers": target_customers.strip(),
+                "competitor_brands": competitor_brands.strip(),
+                "tone": tone.strip(),
+                "technical_standards": technical_standards.strip(),
+                "geo_keywords": geo_keywords.strip(),
+                "hotline": hotline.strip(),
+                "email": email.strip(),
+                "address": address.strip(),
+                "warehouse": warehouse.strip(),
+            }
+            if edit_id:
+                pm.update(edit_id, payload)
+                st.success("Đã cập nhật project.")
+            else:
+                pm.create(payload)
+                st.success("Đã tạo project mới.")
             st.session_state.show_project_form = False
             st.session_state.edit_project_id = None
             st.rerun()
-
-        if save_project:
-            if not name.strip() or not brand_name.strip() or not domain.strip():
-                st.error("Cần điền đủ: Tên project, Brand name và Domain.")
-            else:
-                payload = {
-                    "name": name.strip(),
-                    "brand_name": brand_name.strip(),
-                    "domain": domain.strip(),
-                    "company_full_name": company_full_name.strip(),
-                    "industry": industry.strip(),
-                    "main_products": main_products.strip(),
-                    "usp": usp.strip(),
-                    "target_customers": target_customers.strip(),
-                    "competitor_brands": competitor_brands.strip(),
-                    "tone": tone.strip(),
-                    "technical_standards": technical_standards.strip(),
-                    "geo_keywords": geo_keywords.strip(),
-                    "hotline": hotline.strip(),
-                    "email": email.strip(),
-                    "address": address.strip(),
-                    "warehouse": warehouse.strip(),
-                }
-                if edit_id:
-                    pm.update(edit_id, payload)
-                    st.success("Đã cập nhật project.")
-                else:
-                    pm.create(payload)
-                    st.success("Đã tạo project mới.")
-                st.session_state.show_project_form = False
-                st.session_state.edit_project_id = None
-                st.rerun()
 
 
 def render_projects_tab(pm: ProjectManager, active_project) -> None:
@@ -1064,12 +1242,27 @@ def render_settings_tab(sheet_url: str) -> None:
     with st.container(border=True):
         st.markdown("#### Bảo trì dữ liệu")
         st.caption("Reset CSV local và xóa dữ liệu cũ trên Google Sheet từ dòng 2 trở đi.")
-        if st.button("Reset database", type="primary"):
-            for message in reset_database(sheet_url):
-                if "lỗi" in message.lower() or "không" in message.lower():
-                    st.warning(message)
-                else:
-                    st.success(message)
+        # Phase 1.7: Confirmation dialog trước khi reset (2-step confirm)
+        if "confirm_reset" not in st.session_state:
+            st.session_state.confirm_reset = False
+
+        if not st.session_state.confirm_reset:
+            if st.button("⚠️ Reset database", type="primary"):
+                st.session_state.confirm_reset = True
+                st.rerun()
+        else:
+            st.warning("⚠️ Bạn sắp xóa toàn bộ dữ liệu CSV và Google Sheet. Hành động này KHÔNG THỂ HOÀN TÁC.")
+            warn_col1, warn_col2 = st.columns(2)
+            if warn_col1.button("Hủy", use_container_width=True):
+                st.session_state.confirm_reset = False
+                st.rerun()
+            if warn_col2.button("🗑️ Xác nhận xóa toàn bộ", type="primary", use_container_width=True):
+                for message in reset_database(sheet_url):
+                    if "lỗi" in message.lower() or "không" in message.lower():
+                        st.warning(message)
+                    else:
+                        st.success(message)
+                st.session_state.confirm_reset = False
 
     with st.container(border=True):
         st.markdown("#### Ghi chú vận hành")

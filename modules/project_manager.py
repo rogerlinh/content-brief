@@ -355,4 +355,18 @@ NAP chuẩn (bắt buộc chèn cuối bài trong [SUPP]):
 
 Quy tắc brand đối thủ: {competitor_note}
 """
+        # Phase 1.3 fix: f-string escapes {{...}} as literal braces.
+        # Build the sample sentence correctly (not via f-string double-brace).
+        product_ph = "{TÊN SẢN PHẨM}"
+        spec_ph = "{QUY CÁCH}"
+        sample_sentence = (
+            project.brand_name + " cung cấp " + product_ph + " " + spec_ph
+            + " tại " + first_geo + ". " + project.usp + ". Liên hệ: " + project.hotline + "."
+        )
+        # Replace the double-brace literal with the correctly-built sentence
+        source_ctx = source_ctx.replace(
+            f'"{project.brand_name} cung cấp {{TÊN SẢN PHẨM}} {{QUY CÁCH}} '
+            f'tại {first_geo}. {project.usp}. Liên hệ: {project.hotline}."',
+            f'"{sample_sentence}"',
+        )
         return source_ctx

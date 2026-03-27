@@ -1460,3 +1460,53 @@ Lecture 80 - Creating Quality Nodes for Changing Search Engine's Perception
 ●	Sometimes at the beginning Koray utilises the ‘brand approach’, by giving the brand name (or the pronoun we) we give our expert opinion on the particular manner, to reflect we are the expert source (Topical Authority).
 ●	If there’s no consensus on a particular sub topic, or section, we can explain both sides, in terms of there being anecdotal experience, and there being no scientific backing or conflicting studies to ensure we are relevant and more responsive to all queries.
 
+
+
+---
+
+## KORAY TOPICAL MAP + OUTLINE STRUCTURE RULES (Vietnamese Steel Context)
+
+### Topical Map Building
+- Topical Map = Semantic Content Network
+- Root Article (keyword chinh) -> Seeds (sub-topics) -> Quality Nodes (gan homepage)
+- Central Entity xuat hien trong moi brief
+- Internal Link: nhac keyword 1-5 lan truoc khi link
+
+### Outline Structure cho thep xay dung
+- H1: [Keyword] + [Year]
+- H2 dau tien: [MAIN] Dinh nghia / Tong quan
+- H2 cuoi: [SUPP] Cau hoi lien quan (PAA)
+- Moi H2 [MAIN] co >=1 H3
+- SAPO >= 80 tu: dinh nghia -> thuoc tinh -> ung dung -> brand context
+
+### GEO/AI Overview Checklist
+- Heading H2 ngan, tra loi truc tiep cau hoi
+- Cau dau moi doan <= 20 tu
+- Bang so san pham: spec -> gia -> uu diem
+- Schema markup: FAQPage, HowTo, LocalBusiness
+- Bold cau tra loi chinh trong FAQ
+- Internal links co context justification
+
+
+## KORAY TOPICAL MAP + OUTLINE RULES (Vietnamese Steel/B2B Industry Context)
+
+### Topical Map Building
+- Topical Map = Semantic Content Network
+- Root Article (keyword chinh) -> Seeds (sub-topories) -> Quality Nodes (gan homepage)
+- Central Entity xuat hien trong moi brief
+- Internal Link: nhac keyword 1-5 lan truoc khi link
+
+### Outline Structure cho Vietnamese Steel / B2B
+- H1: [Keyword chinh] + [Year]
+- H2 dau tien: [MAIN] Dinh nghia / Tong quan
+- H2 cuoi: [SUPP] Cau hoi lien quan (PAA)
+- Moi H2 [MAIN] co >=1 H3
+- SAPO >= 80 tu: dinh nghia -> thuoc tinh -> ung dung -> brand context
+
+### GEO/AI Overview Checklist
+- Heading H2 ngan, tra loi truc tiep cau hoi
+- Cau dau moi doan <= 20 tu
+- Bang so san pham: spec -> gia -> uu diem
+- Schema markup: FAQPage, HowTo, LocalBusiness
+- Bold cau tra loi chinh trong FAQ
+- Internal links co context justification

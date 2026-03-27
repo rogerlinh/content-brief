@@ -15,6 +15,7 @@ import sys
 import io
 import time
 import logging
+import logging.handlers
 import traceback
 
 # ── Phase 18: Force Flush stdout/stderr (không buffer) ──
@@ -24,17 +25,47 @@ try:
 except Exception:
     pass  # Bỏ qua nếu đã wrapped
 
+# ── Phase 4.1: RotatingFileHandler cho worker log ──
+def _setup_worker_logging(log_path: str) -> logging.Logger:
+    """Setup logging với RotatingFileHandler (5MB max, 3 backup files)."""
+    _logger = logging.getLogger("Worker")
+    _logger.setLevel(logging.INFO)
+    # Tránh duplicate handlers nếu setup_logging() đã chạy
+    if not _logger.handlers:
+        try:
+            handler = logging.handlers.RotatingFileHandler(
+                log_path,
+                maxBytes=5_000_000,  # 5MB
+                backupCount=3,
+                encoding="utf-8",
+            )
+        except Exception:
+            # Fallback nếu RotatingFileHandler không khả dụng
+            handler = logging.FileHandler(log_path, encoding="utf-8")
+        formatter = logging.Formatter(
+            "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        handler.setFormatter(formatter)
+        _logger.addHandler(handler)
+    return _logger
+
 # Setup logging
 try:
-    from config import setup_logging
+    from config import setup_logging, OUTPUT_DIR
     setup_logging()
 except Exception:
-    logging.basicConfig(level=logging.INFO)
+    OUTPUT_DIR = "output_ui"
+
+_log_path = os.path.join(OUTPUT_DIR, "..", "worker_error.log") if OUTPUT_DIR else "worker_error.log"
+_log_path = os.path.abspath(_log_path)
+logger = _setup_worker_logging(_log_path)
 
 from modules.gsheet_logger import GSheetLogger
 from modules.csv_logger import CsvLogger
 
-logger = logging.getLogger("Worker")
+# ── Phase 4.1: Schema version constant ──
+JOB_QUEUE_SCHEMA_VERSION = 1
 
 JOB_FILE = "job_queue.json"
 LOCK_FILE = "worker_lock.txt"
@@ -165,6 +196,20 @@ def main():
 
     except Exception as e:
         logger.error("Lỗi đọc job_queue.json: %s", e)
+        return
+
+    # ── Phase 4.1: Schema validation cho job_queue.json ──
+    schema_version = job_data.get("schema_version", 0)
+    if schema_version < JOB_QUEUE_SCHEMA_VERSION:
+        logger.warning(
+            "job_queue.json schema version=%d < expected=%d. "
+            "Data có thể không tương thích. Tiếp tục xử lý...",
+            schema_version, JOB_QUEUE_SCHEMA_VERSION,
+        )
+
+    # Validate required fields
+    if "keywords" not in job_data:
+        logger.error("job_queue.json thiếu trường 'keywords'. Worker thoát.")
         return
 
     keywords = job_data.get("keywords", [])

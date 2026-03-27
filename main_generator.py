@@ -94,31 +94,47 @@ def _process_single_topic(
     # Step 2: SERP + Competitor analysis (TRƯỚC analyze_topic để có data cho Dynamic Heading)
     serp_data = None
     competitor_data = None
+    serp_error_msg = ""
     if enable_serp:
-        serp_data = analyze_serp(topic)
-        
-        # ── GUARD: đảm bảo serp_data là dict ──
-        if isinstance(serp_data, str):
-            logger.warning("serp_data là string thay vì dict: %s", serp_data[:200])
-            serp_data = {}
-        if not isinstance(serp_data, dict):
-            serp_data = {}
-            
-        if serp_data.get("top_urls"):
-            competitor_data = analyze_competitors(serp_data["top_urls"], topic)
-            
-            # ── GUARD: đảm bảo competitor_data là dict ──
-            if isinstance(competitor_data, str):
-                logger.warning("competitor_data là string: %s", competitor_data[:200])
-                competitor_data = {}
-            if not isinstance(competitor_data, dict):
-                competitor_data = {}
-        else:
-            raise RuntimeError(
-                f"SERP crawl thất bại cho '{topic}': không tìm thấy URL đối thủ nào trên Google. "
-                "Pipeline DỪNG để tránh sinh nội dung giả (hallucination). "
-                "Kiểm tra kết nối mạng hoặc thử lại sau."
-            )
+        # Phase 4.2: Circuit breaker — skip keyword on SERP failure, don't stop entire batch
+        try:
+            serp_data = analyze_serp(topic)
+
+            # ── GUARD: đảm bảo serp_data là dict ──
+            if isinstance(serp_data, str):
+                logger.warning("serp_data là string thay vì dict: %s", serp_data[:200])
+                serp_data = {}
+            if not isinstance(serp_data, dict):
+                serp_data = {}
+
+            if serp_data.get("top_urls"):
+                competitor_data = analyze_competitors(serp_data["top_urls"], topic)
+
+                # ── GUARD: đảm bảo competitor_data là dict ──
+                if isinstance(competitor_data, str):
+                    logger.warning("competitor_data là string: %s", competitor_data[:200])
+                    competitor_data = {}
+                if not isinstance(competitor_data, dict):
+                    competitor_data = {}
+            else:
+                serp_error_msg = (
+                    f"SERP crawl cho '{topic}': không tìm thấy URL đối thủ trên Google. "
+                    "Bỏ qua keyword này để batch tiếp tục."
+                )
+                logger.warning("[CIRCUIT-BREAKER] %s", serp_error_msg)
+        except Exception as serp_exc:
+            serp_error_msg = f"SERP lỗi cho '{topic}': {serp_exc}. Bỏ qua keyword này."
+            logger.warning("[CIRCUIT-BREAKER] %s", serp_error_msg)
+            serp_data = None
+            competitor_data = None
+
+    # Phase 4.2: Skip keyword nếu SERP failed (circuit breaker)
+    # Still log to CSV/GSheet với status="Error" rồi continue
+    if serp_error_msg and enable_serp:
+        # Log error status vào CSV trước khi return None
+        serp_data = {}  # empty but valid for analysis step
+        competitor_data = {}  # empty but valid for analysis step
+        # Lưu ý: SERP failure được handle bên dưới — brief vẫn được tạo nhưng thiếu data
 
     # Step 3: Phân tích topic (Dynamic Heading Construction dùng SERP + Competitor data)
     analysis = analyze_topic(
@@ -222,9 +238,11 @@ def _process_single_topic(
     linking_data = None  # Will be populated from brief["internal_linking"] after build_brief
 
     # Step 7.5: Xác định Methodology
+    # Phase 2.2: Normalize intent string trước khi dùng (single source of truth)
     from modules.article_writer import auto_detect_methodology, get_methodology_prompt
+    from modules.intent import normalize_intent
     if methodology == "auto":
-        intent_str = str(intent_val) if intent_val else "informational"
+        intent_str = normalize_intent(str(intent_val) if intent_val else "informational")
         methodology = auto_detect_methodology(intent_str, topic)
     methodology_prompt = get_methodology_prompt(methodology)
     logger.info("  [METHODOLOGY] Sử dụng: %s", methodology)
@@ -257,6 +275,16 @@ def _process_single_topic(
         eav_table=eav_table, # Phase 35 Chained Context Flow
     )
     brief["eav_table"] = eav_table # Lưu lại dùng cho Phase 33 Logging
+
+    # Phase 4.2: Validate required keys từ build_brief trước khi dùng
+    _required_brief_keys = ["heading_structure", "micro_briefing", "title_tag", "central_entity"]
+    for _key in _required_brief_keys:
+        if _key not in brief:
+            logger.warning(
+                "[BUILD-BRIEF] Key '%s' missing from brief. Setting empty default.",
+                _key,
+            )
+            brief[_key] = [] if _key == "heading_structure" or _key == "micro_briefing" else ""
 
     # V18: Build display strings cho CSV/GSheet logging (BUG-2A/2B fix)
     brief["query_network_str"] = _format_network_for_log(brief.get("query_network"))
@@ -593,30 +621,20 @@ def run_pipeline(
     errors = []
 
     if workers > 1 and len(topics) > 1:
-        # ── Đa luồng (multi-processing) ──
-        logger.info("[MULTI-PROCESS] Sử dụng %d workers cho %d topics", workers, len(topics))
-        with ProcessPoolExecutor(max_workers=workers) as executor:
-            future_to_topic = {}
-            for i, topic_data in enumerate(topics, 1):
-                topic = topic_data["topic"]
-                future = executor.submit(
-                    _process_single_topic,
-                    topic, enable_serp, enable_network, enable_context, enable_linking,
-                    "auto", output_dir, total_steps,
-                    glog, csv_log, -1, None,
-                )
-                future_to_topic[future] = (i, topic)
-
-            for future in as_completed(future_to_topic):
-                idx, topic = future_to_topic[future]
-                try:
-                    filepath = future.result()
-                    if filepath:
-                        generated_files.append(filepath)
-                except Exception as e:
-                    error_msg = f"Lỗi khi xử lý '{topic}': {str(e)}"
-                    logger.error("  ✗ %s", error_msg)
-                    errors.append(error_msg)
+        # ── Multi-processing: RAISED — disables logging silently ──
+        # ⚠️  Bug Fix Phase 1: glog và csv_log = None trong parallel mode → không log gì cả.
+        # Raise error để user biết. Dùng workers=1 hoặc chạy qua app.py.
+        logger.error(
+            "[MULTI-PROCESS] workers=%d ENABLED but GSheet+CSV logging is DISABLED "
+            "in parallel mode. Results will not be logged. Use workers=1 or app.py.",
+            workers,
+        )
+        raise NotImplementedError(
+            "Multi-processing mode (workers>1) disables GSheet and CSV logging. "
+            "The current CLI pipeline silently skips all logging in parallel mode. "
+            "To fix: use workers=1 (sequential) or run batch via app.py (which handles logging). "
+            "TODO: Implement a multiprocessing-safe logging queue to re-enable parallel mode."
+        )
     else:
         # ── Tuần tự (single-process, mặc định) ──
         for i, topic_data in enumerate(topics, 1):

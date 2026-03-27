@@ -110,15 +110,17 @@ METHODOLOGY_LABELS = {
 def auto_detect_methodology(intent: str, keyword: str = "") -> str:
     """
     Tự động chọn Methodology dựa trên Search Intent + keyword.
-    
+
     Args:
         intent: Search Intent đã phân tích (informational, commercial, etc.)
         keyword: Từ khóa gốc (dùng để detect niche).
-    
+
     Returns:
         Key của METHODOLOGIES (ví dụ: 'evidence_based', 'product_review').
     """
-    intent_lower = str(intent).lower()
+    # Phase 2.2: Use centralized normalize_intent from modules/intent.py
+    from modules.intent import normalize_intent
+    intent_lower = normalize_intent(intent)
     kw_lower = keyword.lower()
     
     # Detect theo keyword trước (ưu tiên cao)

@@ -842,20 +842,17 @@ def _agent_synthesize_raw_outline(
         )
 
         logger.info("  [HEADING SYNTHESIS] Gọi LLM để tổng hợp Outline Toàn Diện...")
-        
-        response = client.chat.completions.create(
+
+        # Phase 2.3: Use llm_utils for retry + centralized settings
+        from modules.llm_utils import call_llm_outline
+        raw_text = call_llm_outline(
+            client=client,
             model=LLM_CONFIG.get("model", "gpt-4o-mini"),
             messages=[
                 {"role": "system", "content": system_instruction},
-                {"role": "user", "content": user_content}
+                {"role": "user", "content": user_content},
             ],
-            temperature=0.4,
-            max_tokens=2000,
-            timeout=60,
         )
-
-        # ── Parse Output ──
-        raw_text = response.choices[0].message.content.strip()
         # Clean JSON markdown blocks if any
         if raw_text.startswith("```json"):
             raw_text = raw_text[7:]
@@ -926,17 +923,16 @@ def _agent_synthesize_raw_outline(
                     f"- KHÔNG dùng H2 chỉ nói về 1 entity trong bài 'vs' (ví dụ: chỉ nói về 'quy trình sản xuất thép cuộn' mà không so sánh với thép tấm)"
                 )
                 try:
-                    retry_response = client.chat.completions.create(
+                    # Phase 2.3: Use llm_utils for retry
+                    from modules.llm_utils import call_llm_outline
+                    retry_raw = call_llm_outline(
+                        client=client,
                         model=LLM_CONFIG.get("model", "gpt-4o-mini"),
                         messages=[
                             {"role": "system", "content": system_instruction},
-                            {"role": "user", "content": retry_user_content}
+                            {"role": "user", "content": retry_user_content},
                         ],
-                        temperature=0.4,
-                        max_tokens=2000,
-                        timeout=60,
                     )
-                    retry_raw = retry_response.choices[0].message.content.strip()
                     if retry_raw.startswith("```json"):
                         retry_raw = retry_raw[7:]
                     if retry_raw.startswith("```"):
@@ -1086,20 +1082,17 @@ def _agent_enforce_semantic_seo(
         )
 
         logger.info("  [AGENT 2] Gọi LLM Semantic Enforcer để SEO-ify Outline...")
-        
-        response = client.chat.completions.create(
+
+        # Phase 2.3: Use llm_utils for retry + centralized settings
+        from modules.llm_utils import call_llm_seo
+        raw_text = call_llm_seo(
+            client=client,
             model=LLM_CONFIG.get("model", "gpt-4o-mini"),
             messages=[
                 {"role": "system", "content": system_instruction},
-                {"role": "user", "content": user_content}
+                {"role": "user", "content": user_content},
             ],
-            temperature=0.3,
-            max_tokens=2500,
-            timeout=60,
         )
-
-        # ── Parse Output ──
-        raw_text = response.choices[0].message.content.strip()
         if raw_text.startswith("```json"):
             raw_text = raw_text[7:]
         if raw_text.startswith("```"):
@@ -2063,18 +2056,17 @@ def _agent_micro_briefing_writer(
         )
 
         logger.info("  [MICRO-BRIEFING] Gọi LLM lấy JSON chi tiết A-B-C-D-E format...")
-        response = client.chat.completions.create(
+
+        # Phase 2.3: Use llm_utils for retry + centralized settings
+        from modules.llm_utils import call_llm_micro
+        raw_text = call_llm_micro(
+            client=client,
             model=LLM_CONFIG.get("model", "gpt-4o-mini"),
             messages=[
                 {"role": "system", "content": system_instruction},
-                {"role": "user", "content": user_content}
+                {"role": "user", "content": user_content},
             ],
-            temperature=0.4,
-            max_tokens=4000,
-            timeout=120,
         )
-
-        raw_text = response.choices[0].message.content.strip()
         if raw_text.startswith("```json"):
             raw_text = raw_text[7:]
         elif raw_text.startswith("```"):
