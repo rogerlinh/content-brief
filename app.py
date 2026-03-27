@@ -494,15 +494,29 @@ def process_cloud_batch_if_needed() -> None:
             pm = ProjectManager()
             project = pm.get_by_id(project_id)
 
-        from main_generator import generate_content_brief
+        from main_generator import _process_single_topic
 
-        result = generate_content_brief(
+        glog = None
+        if os.path.exists(CREDS_PATH):
+            glog = GSheetLogger(
+                creds_path=CREDS_PATH,
+                sheet_url=st.session_state.batch_sheet_url or DEFAULT_SHEET_URL,
+            )
+            if not glog.connect():
+                glog = None
+
+        result = _process_single_topic(
             topic=keyword,
             enable_serp=st.session_state.batch_config.get("enable_serp", True),
             enable_network=st.session_state.batch_config.get("enable_network", False),
             enable_context=st.session_state.batch_config.get("enable_context", False),
             enable_linking=st.session_state.batch_config.get("enable_linking", True),
             methodology=st.session_state.batch_config.get("methodology", "auto"),
+            output_dir="output_ui",
+            total_steps=1,
+            glog=glog,
+            csv_log=None,
+            csv_row=-1,
             project=project,
         )
         st.session_state.batch_results.append(
@@ -663,7 +677,7 @@ def render_generate_tab(active_project, worker_running: bool) -> str:
                 """,
                 unsafe_allow_html=True,
             )
-            st.caption("Khi chạy lại cùng một keyword, app sẽ append một dòng mới trên Google Sheet thay vì ghi đè dòng cũ.")
+            st.caption("Khi chạy lại cùng một keyword, app sẽ cập nhật lại chính dòng cũ trên Google Sheet để bạn dễ theo dõi.")
 
             run_issues = validate_run_request(keywords, enable_serp)
             if run_issues:
