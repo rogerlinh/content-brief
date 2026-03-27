@@ -153,23 +153,37 @@ class GSheetLogger:
             logger.warning("[GSHEET] Lỗi refresh cache cột A: %s", str(e))
 
     def _next_available_row(self) -> int:
-        """Luon append xuong cuoi de rerun cung keyword van tao dong moi."""
+        """Tim dong trong dau tien o cot A, neu khong co thi append xuong cuoi."""
         try:
-            all_values = self.worksheet.get_all_values()
-            return len(all_values) + 1
+            col_a_values = self.worksheet.col_values(1)
+            for idx, value in enumerate(col_a_values[1:], start=2):
+                if not str(value).strip():
+                    return idx
+            return max(len(col_a_values) + 1, 2)
         except Exception as e:
-            logger.warning("[GSHEET] Khong lay duoc dong cuoi: %s", str(e))
-            try:
-                return len(self.worksheet.col_values(1)) + 1
-            except Exception:
-                return 2
+            logger.warning("[GSHEET] Khong lay duoc dong trong tiep theo: %s", str(e))
+            return 2
+
+    def _reset_keyword_row(self, row: int, keyword: str):
+        """Xoa du lieu cu tren dong rerun de lan chay moi cap nhat ro rang."""
+        if row < 2:
+            return
+        blank_values = [""] * (len(SHEET_HEADERS) - 1)
+        self.worksheet.update(
+            range_name=f"B{row}:R{row}",
+            values=[blank_values],
+        )
+        self.worksheet.update(
+            range_name=f"A{row}:B{row}",
+            values=[[keyword, "RUNNING"]],
+        )
+        self.worksheet.format(
+            f"A{row}:R{row}",
+            {"backgroundColor": {"red": 1.0, "green": 0.95, "blue": 0.8}},
+        )
 
     def start_keyword(self, keyword: str) -> int:
-        """
-        Bat dau xu ly 1 keyword.
-        Moi lan chay luon append mot dong moi tren Google Sheet,
-        ke ca khi keyword da ton tai tu truoc.
-        """
+        """Bat dau xu ly 1 keyword va tai su dung dong cu neu keyword da ton tai."""
         if not self._connected:
             print("[GSHEET] Chua ket noi. Bo qua start_keyword.")
             return -1
@@ -181,10 +195,12 @@ class GSheetLogger:
         try:
             self._refresh_col_a_cache()
             if kw_lower in self._col_a_cache:
-                print("[GSHEET] Keyword da co truoc do. Se append mot dong moi cho lan chay nay.")
-            target_row = self._next_available_row()
+                target_row = self._col_a_cache[kw_lower]
+                print(f"[GSHEET] Keyword da co truoc do. Se cap nhat lai dong {target_row}.")
+            else:
+                target_row = self._next_available_row()
             self._col_a_cache[kw_lower] = target_row
-            print(f"[GSHEET] Dong moi cho lan chay hien tai: {target_row}")
+            print(f"[GSHEET] Dong duoc su dung cho lan chay hien tai: {target_row}")
         except Exception as e:
             self.has_error = True
             print(f"[GSHEET] Loi tim keyword: {e}")
@@ -193,15 +209,7 @@ class GSheetLogger:
 
         print(f"[GSHEET] Ghi '{keyword}' vao dong {target_row}...")
         try:
-            self.worksheet.update(
-                range_name=f"A{target_row}:B{target_row}",
-                values=[[keyword, "RUNNING"]],
-            )
-            time.sleep(0.8)
-            self.worksheet.format(
-                f"A{target_row}:R{target_row}",
-                {"backgroundColor": {"red": 1.0, "green": 0.95, "blue": 0.8}},
-            )
+            self._reset_keyword_row(target_row, keyword)
             print(f"[GSHEET] Da ghi keyword + format dong {target_row}.")
         except Exception as e:
             self.has_error = True
@@ -280,24 +288,26 @@ class GSheetLogger:
         gaps: List[str],
         ngrams: str,
     ):
-        """P1 FIX: Ghi batch 5 cột C-G trong 1 call thay vì 5 calls riêng."""
+        """Ghi dung vao cac cot roi rac C, F, G, I, K."""
         if not self._connected or row < 1:
             return
         try:
-            row_data = [""] * len(SHEET_HEADERS)
-            row_data[HEADER_TO_COL["Search Intent"]] = intent if intent else "N/A (Analysis Failed)"
-            row_data[HEADER_TO_COL["Top 3 Đối thủ"]] = "\n".join(top_urls[:5]) if top_urls else "N/A (No URLs)"
-            row_data[HEADER_TO_COL["PAA Questions"]] = "\n".join(paa) if paa else "N/A (No PAA)"
-            row_data[HEADER_TO_COL["Content Gaps"]] = "\n".join(gaps[:10]) if gaps else "N/A (No Gaps)"
-            row_data[HEADER_TO_COL["Smart N-Grams"]] = ngrams if ngrams else "N/A (No N-grams)"
-            self.worksheet.update(
-                range_name=f"C{row}:G{row}",
-                values=[row_data[2:7]],  # C=col2 → G=col6
-            )
-            # P1 FIX: Bỏ sleep
+            writes = [
+                (HEADER_TO_COL["Search Intent"], intent if intent else "N/A (Analysis Failed)"),
+                (5, "\n".join(top_urls[:5]) if top_urls else "N/A (No URLs)"),
+                (HEADER_TO_COL["Content Gaps"], "\n".join(gaps[:10]) if gaps else "N/A (No Gaps)"),
+                (HEADER_TO_COL["PAA Questions"], "\n".join(paa) if paa else "N/A (No PAA)"),
+                (HEADER_TO_COL["Smart N-Grams"], ngrams if ngrams else "N/A (No N-grams)"),
+            ]
+            for col_idx, value in writes:
+                col_letter = self._col_letter(col_idx)
+                self.worksheet.update(
+                    range_name=f"{col_letter}{row}",
+                    values=[[value]],
+                )
         except Exception as e:
             self.has_error = True
-            logger.warning("[GSHEET] Lỗi log_analysis_results: %s", str(e))
+            logger.warning("[GSHEET] Loi log_analysis_results: %s", str(e))
 
     def log_brief_results(
         self,
