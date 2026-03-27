@@ -599,7 +599,8 @@ def start_local_worker() -> None:
                 except OSError:
                     pass
 
-    error_file = open(ERROR_LOG_PATH, "w", encoding="utf-8")
+    # Phase 35: append mode — không ghi đè log cũ
+    error_file = open(ERROR_LOG_PATH, "a", encoding="utf-8", buffering=1)
     proc = subprocess.Popen(
         [sys.executable, "-u", "worker.py"],
         cwd=BASE_DIR,
@@ -922,9 +923,14 @@ def render_generate_tab(active_project, worker_running: bool) -> str:
                     disabled=not worker_running and not st.session_state.batch_running,
                 )
 
+            # Phase 35: "Làm mới" phải dùng form submit để tránh bị skip khi auto-rerun
+            # Nếu refresh thì chỉ rerun, không chạy logic bên dưới
             if refresh:
                 st.rerun()
+                return  # Exit sớm — rerun đã trigger rồi
 
+            # Phase 35: Auto-poll sau khi khởi động worker
+            # Sau rerun, worker đã start rồi → poll 5 lần mỗi 2 giây để xác nhận worker alive
             if start_batch:
                 job_data = build_job_payload(
                     keywords=keywords,
@@ -944,8 +950,34 @@ def render_generate_tab(active_project, worker_running: bool) -> str:
                     st.rerun()
                 else:
                     start_local_worker()
-                    st.success("Đã khởi chạy worker nền.")
-                    time.sleep(0.8)
+                    st.success("Đã khởi chạy worker nền. Đang xác nhận worker alive...")
+
+                    # Phase 35: Poll 5 lần x 2 giây để xác nhận worker thực sự chạy
+                    # Sau rerun, lock file đã có PID thật → đọc và kiểm tra
+                    poll_ok = False
+                    for _poll_round in range(5):
+                        time.sleep(2)
+                        if os.path.exists(LOCK_FILE):
+                            with open(LOCK_FILE, "r", encoding="utf-8", errors="ignore") as _lf:
+                                _pid_str = _lf.read().strip()
+                            if _pid_str.isdigit():
+                                _pid = int(_pid_str)
+                                # Đọc log mới nhất để xác nhận worker đã bắt đầu
+                                _log_lines = []
+                                if os.path.exists(ERROR_LOG_PATH):
+                                    try:
+                                        with open(ERROR_LOG_PATH, "r", encoding="utf-8", errors="replace") as _lf2:
+                                            _log_lines = _lf2.readlines()
+                                        # Worker log luôn bắt đầu bằng dòng "WORKER BẮT ĐẦU"
+                                        if any("WORKER BẮT ĐẦU" in l for l in _log_lines[-20:]):
+                                            poll_ok = True
+                                            st.success(f"Worker PID={_pid} đã khởi động thành công.")
+                                            break
+                                    except Exception:
+                                        pass
+
+                    if not poll_ok:
+                        st.warning("Worker đã khởi động nhưng chưa xác nhận được log. Nhấn 'Làm mới' để kiểm tra lại.")
                     st.rerun()
 
             if stop_batch:

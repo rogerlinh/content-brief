@@ -60,10 +60,10 @@ class CsvLogger:
             else:
                 # Phase 33: Thêm cột mới nếu file cũ thiếu cột Koray
                 try:
-                    df_check = pd.read_csv(self.db_path, nrows=0, encoding="utf-8-sig")
+                    df_check = pd.read_csv(self.db_path, nrows=0, encoding="utf-8-sig", dtype=str, keep_default_na=False)
                     missing = [c for c in DB_HEADERS if c not in df_check.columns]
                     if missing:
-                        df_full = pd.read_csv(self.db_path, encoding="utf-8-sig")
+                        df_full = pd.read_csv(self.db_path, encoding="utf-8-sig", dtype=str, keep_default_na=False)
                         for col in missing:
                             df_full[col] = ""
                         df_full.to_csv(self.db_path, index=False, encoding="utf-8-sig")
@@ -72,15 +72,17 @@ class CsvLogger:
                     pass
 
     def _read_db(self) -> pd.DataFrame:
-        """Đọc file CSV lên"""
+        """Đọc file CSV lên, dtype=str để tránh FutureWarning khi ghi string vào cột float64."""
         try:
-            return pd.read_csv(self.db_path, encoding="utf-8-sig")
+            return pd.read_csv(self.db_path, encoding="utf-8-sig", dtype=str, keep_default_na=False)
         except Exception:
             # Fallback nếu file lỗi
             return pd.DataFrame(columns=DB_HEADERS)
 
     def _write_db(self, df: pd.DataFrame):
-        """Ghi đè file CSV và flush"""
+        """Ghi đè file CSV và flush. Ép tất cả cột về str để tránh dtype mismatch."""
+        # Ép tất cả cột về string trước khi ghi
+        df = df.astype({c: str for c in df.columns if df[c].dtype != "object"})
         df.to_csv(self.db_path, index=False, encoding="utf-8-sig")
 
     def start_keyword(self, keyword: str) -> int:
