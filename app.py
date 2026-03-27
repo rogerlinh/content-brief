@@ -25,6 +25,7 @@ DB_PATH = os.path.join(BASE_DIR, "database_v2.csv")
 JOB_FILE = os.path.join(BASE_DIR, "job_queue.json")
 LOCK_FILE = os.path.join(BASE_DIR, "worker_lock.txt")
 ERROR_LOG_PATH = os.path.join(BASE_DIR, "worker_error.log")
+DEFAULT_SHEET_URL = "https://docs.google.com/spreadsheets/d/1i_lgFmoB1LJq2Lt01CwDlOk3hVbQxPiZ4LqGqf8mgwM"
 
 IS_CLOUD = bool(os.environ.get("STREAMLIT_SHARING_MODE") or os.environ.get("STREAMLIT_CLOUD"))
 
@@ -40,52 +41,68 @@ def inject_ui_css() -> None:
         """
         <style>
         :root {
-            --bg: #0b1220;
-            --panel: #121c30;
-            --panel-2: #192742;
-            --ink: #f7f8fc;
-            --muted: #9fb0cf;
-            --accent: #f59e0b;
-            --accent-2: #38bdf8;
-            --ok: #22c55e;
-            --danger: #fb7185;
-            --border: rgba(148, 163, 184, 0.18);
+            --bg: #e9eef5;
+            --panel: #eef3f9;
+            --panel-2: #e3eaf3;
+            --ink: #203047;
+            --muted: #5f7088;
+            --accent: #4f7df3;
+            --accent-2: #79c4b7;
+            --ok: #3faa72;
+            --danger: #d96a79;
+            --line: rgba(131, 146, 171, 0.20);
+            --shadow-hi: rgba(255, 255, 255, 0.95);
+            --shadow-lo: rgba(160, 174, 194, 0.65);
         }
         .stApp {
             background:
-                radial-gradient(circle at top left, rgba(56, 189, 248, 0.15), transparent 28%),
-                radial-gradient(circle at top right, rgba(245, 158, 11, 0.12), transparent 24%),
-                linear-gradient(180deg, #09101c 0%, #0f172a 100%);
+                radial-gradient(circle at top left, rgba(79, 125, 243, 0.10), transparent 28%),
+                radial-gradient(circle at top right, rgba(121, 196, 183, 0.12), transparent 24%),
+                linear-gradient(180deg, #edf2f8 0%, #e6ecf4 100%);
+            color: var(--ink);
         }
         .block-container {
             padding-top: 2rem;
             padding-bottom: 2rem;
         }
+        [data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #e9eef5 0%, #e3eaf3 100%);
+            border-right: 1px solid var(--line);
+        }
         div[data-testid="stTabs"] button {
             border-radius: 999px;
             padding: 0.5rem 1rem;
+            background: var(--panel);
+            color: var(--muted);
+            border: 0;
+            box-shadow: 7px 7px 16px var(--shadow-lo), -7px -7px 16px var(--shadow-hi);
         }
         div[data-testid="stTabs"] button[aria-selected="true"] {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(56, 189, 248, 0.18));
+            background: linear-gradient(135deg, rgba(79, 125, 243, 0.16), rgba(121, 196, 183, 0.18));
+            color: var(--ink);
+            box-shadow: inset 4px 4px 8px rgba(175, 187, 203, 0.55), inset -4px -4px 8px rgba(255,255,255,0.85);
         }
         div[data-testid="stMetric"] {
-            background: rgba(18, 28, 48, 0.78);
-            border: 1px solid var(--border);
-            border-radius: 18px;
+            background: var(--panel);
+            border: 1px solid transparent;
+            border-radius: 22px;
             padding: 0.9rem 1rem;
+            box-shadow: 10px 10px 24px var(--shadow-lo), -10px -10px 24px var(--shadow-hi);
+        }
+        div[data-testid="stMetricLabel"], div[data-testid="stMetricValue"] {
+            color: var(--ink);
         }
         .hero-shell {
-            border: 1px solid var(--border);
-            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.55);
+            border-radius: 30px;
             padding: 1.4rem 1.5rem;
             background:
-                linear-gradient(135deg, rgba(18, 28, 48, 0.94), rgba(12, 18, 32, 0.92)),
-                linear-gradient(90deg, rgba(245, 158, 11, 0.12), rgba(56, 189, 248, 0.12));
-            box-shadow: 0 24px 80px rgba(2, 6, 23, 0.35);
+                linear-gradient(145deg, #eef3f9 0%, #e2e9f2 100%);
+            box-shadow: 18px 18px 35px var(--shadow-lo), -18px -18px 35px var(--shadow-hi);
             margin-bottom: 1rem;
         }
         .hero-kicker {
-            color: #ffd17a;
+            color: var(--accent);
             text-transform: uppercase;
             letter-spacing: 0.16em;
             font-size: 0.78rem;
@@ -110,18 +127,20 @@ def inject_ui_css() -> None:
             margin-top: 1rem;
         }
         .pill {
-            border: 1px solid var(--border);
-            background: rgba(25, 39, 66, 0.9);
+            border: 1px solid rgba(255,255,255,0.6);
+            background: var(--panel);
             border-radius: 999px;
             padding: 0.45rem 0.8rem;
-            color: #dbe5f6;
+            color: var(--ink);
             font-size: 0.9rem;
+            box-shadow: 8px 8px 18px var(--shadow-lo), -8px -8px 18px var(--shadow-hi);
         }
         .panel-note {
-            border: 1px solid var(--border);
-            background: rgba(18, 28, 48, 0.72);
-            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.65);
+            background: var(--panel);
+            border-radius: 24px;
             padding: 1rem 1.1rem;
+            box-shadow: 12px 12px 28px var(--shadow-lo), -12px -12px 28px var(--shadow-hi);
         }
         .panel-note h4 {
             margin: 0 0 0.35rem;
@@ -130,6 +149,40 @@ def inject_ui_css() -> None:
         .panel-note p {
             margin: 0;
             color: var(--muted);
+        }
+        div[data-testid="stTextInputRoot"] > div,
+        div[data-testid="stTextArea"] textarea,
+        div[data-testid="stSelectbox"] > div,
+        div[data-testid="stMultiSelect"] > div {
+            background: var(--panel) !important;
+            border-radius: 18px !important;
+            border: 1px solid rgba(255,255,255,0.6) !important;
+            box-shadow: inset 5px 5px 10px rgba(188, 199, 214, 0.65), inset -5px -5px 10px rgba(255,255,255,0.92) !important;
+        }
+        div[data-baseweb="select"] > div,
+        textarea, input {
+            color: var(--ink) !important;
+        }
+        .stButton > button,
+        .stDownloadButton > button {
+            border-radius: 18px !important;
+            border: 1px solid rgba(255,255,255,0.65) !important;
+            background: linear-gradient(145deg, #eef3f9 0%, #dfe7f1 100%) !important;
+            color: var(--ink) !important;
+            box-shadow: 9px 9px 20px var(--shadow-lo), -9px -9px 20px var(--shadow-hi) !important;
+        }
+        .stButton > button[kind="primary"] {
+            background: linear-gradient(135deg, rgba(79, 125, 243, 0.22), rgba(121, 196, 183, 0.24)) !important;
+        }
+        div[data-testid="stDataFrame"], div[data-testid="stForm"], div[data-testid="stExpander"] {
+            border-radius: 24px !important;
+            background: var(--panel) !important;
+            box-shadow: 12px 12px 28px var(--shadow-lo), -12px -12px 28px var(--shadow-hi) !important;
+            border: 1px solid rgba(255,255,255,0.62) !important;
+        }
+        div[data-testid="stAlert"] {
+            border-radius: 18px !important;
+            box-shadow: 8px 8px 18px rgba(169, 181, 198, 0.35), -8px -8px 18px rgba(255,255,255,0.8) !important;
         }
         </style>
         """,
@@ -518,6 +571,10 @@ def render_generate_tab(active_project, worker_running: bool) -> str:
     with col_input:
         with st.container(border=True):
             st.subheader("1. Danh sách keyword")
+            if active_project:
+                st.caption(f"Project active: {active_project.brand_name} · {active_project.domain}")
+            else:
+                st.caption("Chưa có project active. Brief vẫn chạy nhưng thiếu source context cho brand.")
             input_method = st.radio(
                 "Nguồn dữ liệu",
                 options=["Nhập thủ công", "Upload CSV"],
@@ -560,14 +617,14 @@ def render_generate_tab(active_project, worker_running: bool) -> str:
                 options=list(METHODOLOGY_LABELS.keys()),
                 format_func=lambda key: METHODOLOGY_LABELS.get(key, key),
             )
-            st.caption("Không chọn project thì brief vẫn chạy, nhưng sẽ thiếu source context cho brand.")
+            st.caption("Checklist: keyword có dữ liệu, API keys đủ, project active đúng brand, và SERP chỉ bật khi có Serper.")
 
     with col_run:
         with st.container(border=True):
             st.subheader("3. Kết nối & chạy job")
             sheet_url = st.text_input(
                 "Google Sheet URL",
-                value="https://docs.google.com/spreadsheets/d/1i_lgFmoB1LJq2Lt01CwDlOk3hVbQxPiZ4LqGqf8mgwM",
+                value=DEFAULT_SHEET_URL,
                 help="Có thể để mặc định nếu đang dùng sheet cũ.",
             )
 
@@ -907,6 +964,13 @@ def render_projects_tab(pm: ProjectManager, active_project) -> None:
             for project in projects
         ]
         st.dataframe(pd.DataFrame(project_rows), use_container_width=True, hide_index=True)
+
+        selected_project = pm.get_by_id(selected_pid)
+        if selected_project:
+            with st.container(border=True):
+                st.markdown("#### Source Context Preview")
+                st.caption("Khối này là ngữ cảnh thương hiệu được inject vào prompt khi pipeline chạy.")
+                st.code(pm.to_source_context_string(selected_project), language="markdown")
     else:
         st.info("Chưa có project nào.")
 
@@ -964,6 +1028,12 @@ def render_settings_tab(sheet_url: str) -> None:
                     st.warning(message)
                 else:
                     st.success(message)
+
+    with st.container(border=True):
+        st.markdown("#### Ghi chú vận hành")
+        st.write("Cloud mode xử lý tuần tự và phù hợp batch nhỏ.")
+        st.write("Local worker vẫn là lựa chọn ổn hơn khi chạy nhiều keyword hoặc debug pipeline.")
+        st.write("Secrets nên ưu tiên cấu hình ở Streamlit Secrets khi chạy cloud lâu dài.")
 
 
 inject_ui_css()
