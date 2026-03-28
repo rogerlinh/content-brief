@@ -87,24 +87,37 @@ class CsvLogger:
 
     def start_keyword(self, keyword: str) -> int:
         """
-        Bắt đầu xử lý keyword -> Append row với trạng thái Running.
+        Bắt đầu xử lý keyword → Reset row nếu keyword đã tồn tại, append mới nếu chưa.
         Trả về Index row vừa tạo.
+        Phase 36: Giống GSheetLogger — tái sử dụng row cũ khi rerun.
         """
         with file_lock:
             df = self._read_db()
-            
-            # Kiểm tra xem keyword đã có trong hôm nay hay job hiện tại chưa
-            # Thực tế cứ append vào cuối
+            kw_lower = str(keyword).strip().lower()
+
+            # Tìm row đã có cho keyword này
+            if not df.empty and "Keyword" in df.columns:
+                mask = df["Keyword"].fillna("").str.lower().str.strip() == kw_lower
+                existing = df[mask]
+                if not existing.empty:
+                    row_idx = int(existing.index[-1])
+                    df.at[row_idx, "Trạng thái"] = "🔄 Running"
+                    # Xóa data cũ (giữ lại Keyword + Trạng thái)
+                    for col in DB_HEADERS:
+                        if col not in ("Keyword", "Trạng thái"):
+                            df.at[row_idx, col] = ""
+                    self._write_db(df)
+                    logger.debug("[CSV] Reset row %d for keyword '%s' (rerun)", row_idx, keyword)
+                    return row_idx
+
+            # Keyword mới: append row
             new_row = {col: "" for col in DB_HEADERS}
             new_row["Keyword"] = keyword
             new_row["Trạng thái"] = "🔄 Running"
-            
-            # Thêm row dùng append hoặc concat
             df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
             self._write_db(df)
-            
             row_index = len(df) - 1
-            logger.debug("[CSV] Started row %d for %s", row_index, keyword)
+            logger.debug("[CSV] Append row %d for new keyword '%s'", row_index, keyword)
             return row_index
 
     def update_cell(self, row_idx: int, column_name: str, value: str):

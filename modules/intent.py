@@ -22,7 +22,6 @@ import re
 # ──────────────────────────────────────────────────────────────────────────
 #  INTENT KEYWORD DICTIONARIES
 # ──────────────────────────────────────────────────────────────────────────
-# These are sourced from config.py SEARCH_INTENT_KEYWORDS
 _COMMERCIAL_KW = frozenset({
     "mua", "bán", "giá", "bao nhiêu", "báo giá", "bảng giá",
     "địa chỉ bán", "nơi bán", "shop", "store", "order", "đặt hàng",
@@ -49,23 +48,26 @@ _NAVIGATIONAL_KW = frozenset({
 
 def detect_intent(topic: str) -> str:
     """
-    Phát hiện search intent từ topic string.
+    Phat hien search intent tu topic string.
 
     Args:
-        topic: Keyword/phrase cần phân tích
+        topic: Chuoi keyword can phan tich
 
     Returns:
-        Một trong: "commercial", "informational", "transactional", "navigational"
+        Mot trong: "informational" | "commercial" | "transactional" | "navigational"
     """
+    # Phase 36: Guard None/empty input -> default informational
+    if not topic or not str(topic).strip():
+        return "informational"
+
     t = topic.lower().strip()
 
-    # "vs" / so sánh → commercial (needs comparison outline)
+    # "vs" / so sanh -> commercial (needs comparison outline)
     if re.search(r"\bvs\b|\bvới\b|\bso sánh\b|\bvs\s+\w", t):
         return "commercial"
 
     # Navigational (check first)
     if any(kw in t for kw in _NAVIGATIONAL_KW):
-        # Xử lý đặc biệt: "thép X" + "mua" → commercial
         if any(kw in t for kw in _COMMERCIAL_KW):
             return "commercial"
         return "navigational"
@@ -74,7 +76,7 @@ def detect_intent(topic: str) -> str:
     if any(kw in t for kw in _TRANSACTIONAL_KW):
         return "transactional"
 
-    # Commercial (giá/báo giá)
+    # Commercial (giá/bao giá)
     if any(kw in t for kw in _COMMERCIAL_KW):
         return "commercial"
 
@@ -87,11 +89,11 @@ def detect_intent(topic: str) -> str:
 
 def normalize_intent(intent_str: str) -> str:
     """
-    Chuẩn hóa intent string về canonical form.
-    Xử lý các variants: "vs", "comparison", "informational", etc.
+    Chuan hoa intent string ve canonical form.
+    Xu ly cac variants: "vs", "comparison", "informational", etc.
 
     Args:
-        intent_str: Raw intent string (từ SERP analysis, user input, etc.)
+        intent_str: Raw intent string (tu SERP analysis, user input, etc.)
 
     Returns:
         Canonical form: "commercial", "informational", "transactional", "navigational"
@@ -101,12 +103,11 @@ def normalize_intent(intent_str: str) -> str:
 
     s = str(intent_str).lower().strip()
 
-    # Handle common variants
     _intent_map = {
         "vs": "commercial",
         "comparison": "commercial",
         "commercial": "commercial",
-        "giao dịch": "transactional",
+        "giao dich": "transactional",
         "transaction": "transactional",
         "transactional": "transactional",
         "thông tin": "informational",
@@ -126,8 +127,7 @@ def normalize_intent(intent_str: str) -> str:
 
 def get_h2_minimum(intent: str) -> int:
     """
-    Trả về số H2 tối thiểu cần có theo intent type.
-    Dựa trên modules/constants.py H2_MIN_FOR_INTENT.
+    Tra ve so H2 toi thieu can co theo intent type.
 
     Args:
         intent: Canonical intent string
@@ -146,11 +146,11 @@ def get_h2_minimum(intent: str) -> int:
 
 def intent_to_methodology(intent: str, topic: str = "") -> str:
     """
-    Map intent → recommended writing methodology.
+    Map intent to recommended writing methodology.
 
     Args:
         intent: Canonical intent string
-        topic: Full topic string (optional, for additional detection)
+        topic: Full topic string (optional)
 
     Returns:
         Methodology key: "evidence_based", "product_review", "step_by_step", "comparative", "general"

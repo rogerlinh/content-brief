@@ -15,7 +15,7 @@ import logging
 import os
 import sys
 import time
-from concurrent.futures import ProcessPoolExecutor, as_completed
+# Phase 36: Removed unused ProcessPoolExecutor, as_completed
 
 # Đảm bảo project root nằm trong sys.path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -221,7 +221,7 @@ def _process_single_topic(
     # Step 4: Semantic Keyword Network
     network_data = None
     if enable_network:
-        entity_for_net = analysis["central_entity"]
+        entity_for_net = analysis.get("central_entity") or topic  # Phase 36: guard KeyError
         network_data = analyze_query_network(entity_for_net)
 
     # Step 5: Context Builder
@@ -455,16 +455,8 @@ def _process_single_topic(
     # Step 9: Xuất file .md (Thực hiện SAU KHI RECHECK để đảm bảo MD chứa brief đã được fix)
     brief["_project_context"] = project
     filepath, part1_md, part2_md = export_to_markdown(brief, output_dir)
-    
-    # ── LOG FINAL BRIEF VÀO GSHEET & LOCAL CSV ──
-    __full_md = ""
-    if os.path.exists(filepath):
-        try:
-            with open(filepath, "r", encoding="utf-8") as f:
-                f.read()
-        except Exception:
-            pass
 
+    # ── LOG FINAL BRIEF VÀO GSHEET & LOCAL CSV ──
     if glog and gsheet_row > 0:
         glog.log_brief_results(
             row=gsheet_row, headings_outline=headings_str,

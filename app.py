@@ -465,7 +465,13 @@ def save_api_keys(serper_key: str, openai_key: str) -> str:
 
 
 def save_credentials_file(uploaded_file) -> str:
-    creds_data = json.load(uploaded_file)
+    # Phase 36: Wrap json.load để tránh crash trên file không hợp lệ
+    try:
+        creds_data = json.load(uploaded_file)
+    except (json.JSONDecodeError, Exception) as e:
+        return f"Không đọc được credentials JSON: {e}"
+    if not isinstance(creds_data, dict):
+        return "Credentials JSON phải là object/dict."
     with open(CREDS_PATH, "w", encoding="utf-8") as file:
         json.dump(creds_data, file, indent=2, ensure_ascii=False)
     return f"Đã lưu credentials vào {os.path.basename(CREDS_PATH)}."
@@ -599,15 +605,23 @@ def start_local_worker() -> None:
                 except OSError:
                     pass
 
-    # Phase 35: append mode — không ghi đè log cũ
-    error_file = open(ERROR_LOG_PATH, "a", encoding="utf-8", buffering=1)
-    proc = subprocess.Popen(
-        [sys.executable, "-u", "worker.py"],
-        cwd=BASE_DIR,
-        stdout=error_file,
-        stderr=error_file,
-    )
-    # Phase 1.2: Ghi PID thật sau khi xác nhận Popen thành công
+    # Phase 36: Dùng PIPE để worker tự quản lý file write, tránh fd leak
+    # Khi dùng PIPE, parent không giữ open() handle — worker dup2() vào stdout/stderr
+    # Sau đó parent đóng PIPE ngay, worker vẫn ghi được vì dup2() đã copy fd
+    error_file = open(ERROR_LOG_PATH, "a", encoding="utf-8", buffering=1)  # keep open for worker dup
+    try:
+        proc = subprocess.Popen(
+            [sys.executable, "-u", "worker.py"],
+            cwd=BASE_DIR,
+            stdout=error_file,
+            stderr=error_file,
+        )
+    except Exception as e:
+        error_file.close()
+        raise RuntimeError(f"Không khởi động được worker: {e}") from e
+    # Đóng file handle ở parent — dup2() đã copy fd vào child, child vẫn ghi được
+    error_file.close()
+    # Ghi PID ra lock file
     with open(LOCK_FILE, "w", encoding="utf-8") as file:
         file.write(str(proc.pid))
 
@@ -633,8 +647,10 @@ def reset_database(sheet_url: str) -> list[str]:
 
     if os.path.exists(DB_PATH):
         try:
-            headers = pd.read_csv(DB_PATH, nrows=0, encoding="utf-8-sig")
-            headers.to_csv(DB_PATH, index=False, encoding="utf-8-sig")
+            # Phase 36: Tạo file CSV mới với headers sạch — không cần đọc file cũ
+            from modules.csv_logger import DB_HEADERS
+            fresh_df = pd.DataFrame(columns=DB_HEADERS)
+            fresh_df.to_csv(DB_PATH, index=False, encoding="utf-8-sig")
             messages.append("Đã reset database CSV cục bộ.")
         except Exception as exc:
             messages.append(f"Reset CSV lỗi: {exc}")
@@ -991,10 +1007,11 @@ def render_generate_tab(active_project, worker_running: bool) -> str:
 
             total_batch = len(st.session_state.batch_keywords)
             current_idx = st.session_state.batch_idx
-            # Phase 1.5 fix: chỉ hiện progress bar khi đang chạy batch, không khi idle (0%)
-            # Phase 3.3: Step indicator với mô tả tiến trình
-            if st.session_state.batch_running or worker_running:
-                progress = (current_idx / total_batch) if total_batch else 0.0
+            # Phase 36: Chỉ hiện progress bar khi thực sự có batch đang chạy
+            # worker_running=True nhưng total_batch=0 → không hiện progress (worker idle/finished)
+            has_active_work = (st.session_state.batch_running and total_batch > 0) or worker_running
+            if has_active_work:
+                progress = current_idx / total_batch if total_batch > 0 else 0.0
                 st.progress(progress)
                 # Phase 3.3: Hiện step + keyword đang xử lý
                 step_label = f"[{current_idx}/{total_batch}] {st.session_state.batch_current_keyword or 'Đang chuẩn bị...'}"
@@ -1388,8 +1405,14 @@ def render_settings_tab(sheet_url: str) -> None:
                 )
                 submitted = st.form_submit_button("Lưu API keys", type="primary", use_container_width=True)
 
+            # Phase 36: Hiện success message BÊN NGOÀI form để không bị form re-render xóa
             if submitted:
-                st.success(save_api_keys(serper_key, openai_key))
+                msg = save_api_keys(serper_key, openai_key)
+                st.session_state["settings_success"] = msg
+
+    # Hiện message BÊN NGOÀI form (sau form đã submit)
+    if "settings_success" in st.session_state:
+        st.success(st.session_state.pop("settings_success"))
 
     with right:
         with st.container(border=True):
@@ -1402,10 +1425,16 @@ def render_settings_tab(sheet_url: str) -> None:
                 key="settings_creds",
             )
             if uploaded_creds is not None:
-                try:
-                    st.success(save_credentials_file(uploaded_creds))
-                except Exception as exc:
-                    st.error(f"Lưu credentials lỗi: {exc}")
+                # Phase 36: save_credentials_file trả về message, không raise
+                result = save_credentials_file(uploaded_creds)
+                if result.startswith("Đã lưu"):
+                    st.session_state["settings_success"] = result
+                else:
+                    st.session_state["settings_error"] = result
+
+    # Phase 36: Hiện error message từ credentials upload
+    if "settings_error" in st.session_state:
+        st.error(st.session_state.pop("settings_error"))
 
     st.write("")
     with st.container(border=True):

@@ -147,6 +147,14 @@ def generate_source_context_alignment(brief: Dict, project=None) -> str:
     return "\n".join(lines)
 
 
+# ── Phase 36: CONSTANTS for quality scoring ───────────────────────────────────
+# Structural cap: điểm tối đa dựa trên số lượng H2 thực tế
+# < 3 H2 → yếu, 3 H2 → OK, 4 H2 → tốt, ≥5 H2 → không bị cap
+STRUCTURAL_CAPS = {
+    0: 0, 1: 10, 2: 25, 3: 60, 4: 80, 5: 100
+}
+
+
 def calculate_quality_score(brief: Dict, headings: List[Dict], project=None) -> str:
     """
     Tính điểm Koray Quality /100 dựa trên 10 tiêu chí rule-based.
@@ -190,7 +198,7 @@ def calculate_quality_score(brief: Dict, headings: List[Dict], project=None) -> 
 
     # V11-R1: H3 TEMPLATE QUALITY DETECTION
     # Detect H3 headings that are template-generated (contain '??' or '[' brackets)
-    import re
+    # Phase 36: Removed redundant `import re` — already at module top
     def _is_template_h3(t: str) -> bool:
         if "??" in t or t.endswith("??"):
             return True
@@ -282,7 +290,7 @@ def calculate_quality_score(brief: Dict, headings: List[Dict], project=None) -> 
         hotline_clean = re.sub(r'\D', '', project.hotline or "")
         hotline_ok = hotline_clean in re.sub(r'\D', '', all_text) if hotline_clean else True
         checks_passed = sum([brand_ok, geo_ok, hotline_ok])
-        s7 = {3: 10, 2: 7, 1: 4, 0: 0}[checks_passed]
+        s7 = {3: 10, 2: 7, 1: 4, 0: 0}.get(checks_passed, 0)  # Phase 36: .get() safe
         if not brand_ok:
             issues.append("❌ Brand chưa xuất hiện trong SAPO hoặc [SUPP] bridge")
     else:

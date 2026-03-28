@@ -158,7 +158,9 @@ class GSheetLogger:
             logger.warning("[GSHEET] Không thể viết headers: %s", str(e))
 
     def _refresh_col_a_cache(self):
-        """P1 FIX: Đọc toàn bộ cột A 1 lần, cache lại. Gọi khi cần."""
+        """Phase 36: Đọc cột A 1 lần. Gọi nhiều lần trong cùng batch vẫn dùng cache."""
+        if self._col_a_cache:  # đã có cache → bỏ qua
+            return
         try:
             all_values = self.worksheet.col_values(1)
             self._col_a_cache = {}
@@ -170,16 +172,13 @@ class GSheetLogger:
             logger.warning("[GSHEET] Lỗi refresh cache cột A: %s", str(e))
 
     def _next_available_row(self) -> int:
-        """Tim dong trong dau tien o cot A, neu khong co thi append xuong cuoi."""
-        try:
-            col_a_values = self.worksheet.col_values(1)
-            for idx, value in enumerate(col_a_values[1:], start=2):
-                if not str(value).strip():
-                    return idx
-            return max(len(col_a_values) + 1, 2)
-        except Exception as e:
-            logger.warning("[GSHEET] Khong lay duoc dong trong tiep theo: %s", str(e))
-            return 2
+        """Phase 36: Dùng cache để tìm dòng trống — O(1) thay vì O(n)."""
+        self._refresh_col_a_cache()
+        used_rows = set(self._col_a_cache.values())
+        row = 2  # bắt đầu từ dòng 2 (dòng 1 = header)
+        while row in used_rows:
+            row += 1
+        return row
 
     def _reset_keyword_row(self, row: int, keyword: str):
         """Xoa du lieu cu tren dong rerun de lan chay moi cap nhat ro rang."""
