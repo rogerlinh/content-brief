@@ -11,6 +11,23 @@ import os
 import time
 from typing import List, Dict
 
+# ── Phase 35: Retry wrapper cho Google Sheets API ──────────────────────────────
+def _gsheet_update_with_retry(worksheet, range_name, values, max_retries=3, base_delay=2.0):
+    """Wrapper có retry + exponential backoff cho worksheet.update()."""
+    for attempt in range(max_retries):
+        try:
+            worksheet.update(range_name=range_name, values=values)
+            return True
+        except Exception as e:
+            if attempt < max_retries - 1:
+                delay = base_delay * (2 ** attempt)
+                logger.warning("[GSHEET] Update thất bại (lần %d), thử lại sau %.1fs: %s", attempt + 1, delay, e)
+                time.sleep(delay)
+            else:
+                logger.error("[GSHEET] Update thất bại sau %d lần thử: %s", max_retries, e)
+                raise
+    return False
+
 logger = logging.getLogger(__name__)
 
 # Cấu trúc cột trên Google Sheet (Sắp xếp theo Logical Semantic Workflow)
@@ -124,17 +141,17 @@ class GSheetLogger:
             first_row = self.worksheet.row_values(1)
             # Nếu list rỗng hoặc sai kích thước/tiêu đề -> force write
             if not first_row or len(first_row) < len(SHEET_HEADERS) or first_row[:len(SHEET_HEADERS)] != SHEET_HEADERS:
-                self.worksheet.update(
-                    range_name="A1:R1",
-                    values=[SHEET_HEADERS],
-                )
+                _gsheet_update_with_retry(self.worksheet, range_name="A1:R1", values=[SHEET_HEADERS])
                 time.sleep(1.5)
                 # Bold headers
-                self.worksheet.format("A1:R1", {
-                    "textFormat": {"bold": True},
-                    "backgroundColor": {"red": 0.2, "green": 0.6, "blue": 0.9},
-                    "horizontalAlignment": "CENTER",
-                })
+                try:
+                    self.worksheet.format("A1:R1", {
+                        "textFormat": {"bold": True},
+                        "backgroundColor": {"red": 0.2, "green": 0.6, "blue": 0.9},
+                        "horizontalAlignment": "CENTER",
+                    })
+                except Exception as fmt_e:
+                    logger.warning("[GSHEET] Lỗi format headers: %s", fmt_e)
                 time.sleep(1.5)
                 logger.info("[GSHEET] Đã cập nhật lại headers (A1:R1) vào dòng 1")
         except Exception as e:
@@ -168,19 +185,18 @@ class GSheetLogger:
         """Xoa du lieu cu tren dong rerun de lan chay moi cap nhat ro rang."""
         if row < 2:
             return
-        blank_values = [""] * (len(SHEET_HEADERS) - 1)
-        self.worksheet.update(
-            range_name=f"B{row}:R{row}",
-            values=[blank_values],
-        )
-        self.worksheet.update(
-            range_name=f"A{row}:B{row}",
-            values=[[keyword, "RUNNING"]],
-        )
-        self.worksheet.format(
-            f"A{row}:R{row}",
-            {"backgroundColor": {"red": 1.0, "green": 0.95, "blue": 0.8}},
-        )
+        try:
+            blank_values = [""] * (len(SHEET_HEADERS) - 1)
+            _gsheet_update_with_retry(self.worksheet, range_name=f"B{row}:R{row}", values=[blank_values])
+            time.sleep(1.0)
+            _gsheet_update_with_retry(self.worksheet, range_name=f"A{row}:B{row}", values=[[keyword, "🔄 Running"]])
+            time.sleep(1.0)
+            self.worksheet.format(
+                f"A{row}:R{row}",
+                {"backgroundColor": {"red": 1.0, "green": 0.95, "blue": 0.8}},
+            )
+        except Exception as e:
+            logger.warning("[GSHEET] Lỗi _reset_keyword_row row %d: %s", row, e)
 
     def start_keyword(self, keyword: str) -> int:
         """Bat dau xu ly 1 keyword va tai su dung dong cu neu keyword da ton tai."""
@@ -210,6 +226,7 @@ class GSheetLogger:
         print(f"[GSHEET] Ghi '{keyword}' vao dong {target_row}...")
         try:
             self._reset_keyword_row(target_row, keyword)
+            time.sleep(1.5)  # Phase 35: Chờ Google Sheets xác nhận ghi
             print(f"[GSHEET] Da ghi keyword + format dong {target_row}.")
         except Exception as e:
             self.has_error = True
@@ -255,7 +272,7 @@ class GSheetLogger:
         return result
 
     def set_status(self, row: int, status: str):
-        """P1 FIX: Cập nhật trạng thái (Cột B) + đổi màu nền. Bỏ sleep."""
+        """Cập nhật trạng thái (Cột B) + đổi màu nền với retry."""
         if not self._connected or row < 1:
             return
 
@@ -268,13 +285,14 @@ class GSheetLogger:
             label, bg_color = status_map.get(
                 status, (status, {"red": 1.0, "green": 1.0, "blue": 1.0})
             )
-
-            self.worksheet.update(range_name=f"B{row}", values=[[label]])
-            # P1 FIX: Bỏ sleep
-            self.worksheet.format(f"A{row}:R{row}", {
-                "backgroundColor": bg_color,
-            })
-            # P1 FIX: Bỏ sleep
+            # Ghi trạng thái trước
+            _gsheet_update_with_retry(self.worksheet, range_name=f"B{row}", values=[[label]])
+            time.sleep(0.5)
+            # Format màu sau
+            try:
+                self.worksheet.format(f"A{row}:R{row}", {"backgroundColor": bg_color})
+            except Exception as fmt_e:
+                logger.warning("[GSHEET] Lỗi format dòng %d: %s", row, fmt_e)
         except Exception as e:
             self.has_error = True
             logger.warning("[GSHEET] Lỗi set_status: %s", str(e))
@@ -288,26 +306,28 @@ class GSheetLogger:
         gaps: List[str],
         ngrams: str,
     ):
-        """Ghi dung vao cac cot roi rac C, F, G, I, K."""
+        """Ghi từng cột C, F, G, I, K riêng biệt với retry."""
         if not self._connected or row < 1:
             return
-        try:
-            writes = [
-                (HEADER_TO_COL["Search Intent"], intent if intent else "N/A (Analysis Failed)"),
-                (5, "\n".join(top_urls[:5]) if top_urls else "N/A (No URLs)"),
-                (HEADER_TO_COL["Content Gaps"], "\n".join(gaps[:10]) if gaps else "N/A (No Gaps)"),
-                (HEADER_TO_COL["PAA Questions"], "\n".join(paa) if paa else "N/A (No PAA)"),
-                (HEADER_TO_COL["Smart N-Grams"], ngrams if ngrams else "N/A (No N-grams)"),
-            ]
-            for col_idx, value in writes:
+        writes = [
+            (HEADER_TO_COL["Search Intent"], intent if intent else "N/A (Analysis Failed)"),
+            (HEADER_TO_COL["Top 3 Đối thủ"], "\n".join(top_urls[:5]) if top_urls else "N/A (No URLs)"),
+            (HEADER_TO_COL["Content Gaps"], "\n".join(gaps[:10]) if gaps else "N/A (No Gaps)"),
+            (HEADER_TO_COL["PAA Questions"], "\n".join(paa) if paa else "N/A (No PAA)"),
+            (HEADER_TO_COL["Smart N-Grams"], ngrams if ngrams else "N/A (No N-grams)"),
+        ]
+        for col_idx, value in writes:
+            try:
                 col_letter = self._col_letter(col_idx)
-                self.worksheet.update(
+                _gsheet_update_with_retry(
+                    self.worksheet,
                     range_name=f"{col_letter}{row}",
                     values=[[value]],
                 )
-        except Exception as e:
-            self.has_error = True
-            logger.warning("[GSHEET] Loi log_analysis_results: %s", str(e))
+                time.sleep(0.5)
+            except Exception as e:
+                self.has_error = True
+                logger.warning("[GSHEET] Loi log_analysis_results col %s: %s", col_idx, e)
 
     def log_brief_results(
         self,
@@ -317,22 +337,28 @@ class GSheetLogger:
         full_brief_md: str,
         data_analysis_md: str = "",
     ):
-        """P1 FIX: Ghi batch 4 cột M-R trong 1 call."""
+        """Ghi batch 4 cột M-R riêng biệt, mỗi cột có retry riêng."""
         if not self._connected or row < 1:
             return
-        try:
-            row_data = [""] * len(SHEET_HEADERS)
-            row_data[HEADER_TO_COL["Structure Outline"]] = headings_outline if headings_outline else "N/A (No Outline)"
-            row_data[HEADER_TO_COL["Internal Links"]] = internal_links if internal_links else "N/A (No Links)"
-            row_data[HEADER_TO_COL["Báo cáo phân tích dữ liệu"]] = data_analysis_md if data_analysis_md else "N/A (No Data)"
-            row_data[HEADER_TO_COL["Full Content Brief"]] = full_brief_md if full_brief_md else "N/A (Brief Failed)"
-            self.worksheet.update(
-                range_name=f"M{row}:R{row}",
-                values=[row_data[12:18]],  # M=col12 → R=col17
-            )
-        except Exception as e:
-            self.has_error = True
-            logger.warning("[GSHEET] Lỗi log_brief_results: %s", str(e))
+        # M = col 12 (0-indexed: 12), N=13, O=14, P=15, Q=16, R=17
+        writes = [
+            (HEADER_TO_COL["Structure Outline"],          headings_outline or "N/A (No Outline)"),
+            (HEADER_TO_COL["Internal Links"],             internal_links or "N/A (No Links)"),
+            (HEADER_TO_COL["Báo cáo phân tích dữ liệu"], data_analysis_md or "N/A (No Data)"),
+            (HEADER_TO_COL["Full Content Brief"],          full_brief_md or "N/A (Brief Failed)"),
+        ]
+        for col_idx, value in writes:
+            try:
+                col_letter = self._col_letter(col_idx)
+                _gsheet_update_with_retry(
+                    self.worksheet,
+                    range_name=f"{col_letter}{row}",
+                    values=[[value]],
+                )
+                time.sleep(1.0)  # Giữa các write
+            except Exception as e:
+                self.has_error = True
+                logger.warning("[GSHEET] Lỗi log_brief_results col %s: %s", col_idx, e)
 
     def log_error(self, row: int, error_msg: str):
         """Ghi lỗi ngắn gọn vào cột A (ghi đè keyword), tô đỏ cả dòng."""
@@ -342,13 +368,14 @@ class GSheetLogger:
         short_msg = error_msg[:80].replace("❌", "").replace("Error:", "").strip()
         label = f"❌ {short_msg}"
         try:
-            self.worksheet.update(
-                range_name=f"A{row}",
-                values=[[label]],
-            )
-            self.worksheet.format(f"A{row}:R{row}", {
-                "backgroundColor": {"red": 1.0, "green": 0.85, "blue": 0.85},
-            })
+            _gsheet_update_with_retry(self.worksheet, range_name=f"A{row}", values=[[label]])
+            time.sleep(0.5)
+            try:
+                self.worksheet.format(f"A{row}:R{row}", {
+                    "backgroundColor": {"red": 1.0, "green": 0.85, "blue": 0.85},
+                })
+            except Exception as fmt_e:
+                logger.warning("[GSHEET] Lỗi format error row %d: %s", row, fmt_e)
         except Exception as e:
             self.has_error = True
             logger.warning("[GSHEET] Lỗi log_error: %s", str(e))
@@ -362,26 +389,30 @@ class GSheetLogger:
         source_context_alignment: str = "",
         quality_score: str = "",
     ):
-        """Ghi từng cột D, H, J, O, P riêng biệt để không đè data đã ghi ở log_analysis_results."""
+        """Ghi từng cột D, H, J, O, P riêng biệt với retry."""
         if not self._connected or row < 1:
             return
-        try:
-            writes = [
-                (self._col_letter(HEADER_TO_COL["Macro Context"]), macro_context),           # D
-                (self._col_letter(HEADER_TO_COL["EAV Table"]), eav_table),                   # H
-                (self._col_letter(HEADER_TO_COL["FS/PAA Map"]), fs_paa_map),                 # J
-                (self._col_letter(HEADER_TO_COL["Source Context Alignment"]), source_context_alignment),  # O
-                (self._col_letter(HEADER_TO_COL["Koray Quality Score"]), quality_score),     # P
-            ]
-            for col_letter, value in writes:
-                if value:
-                    self.worksheet.update(
-                        range_name=f"{col_letter}{row}",
-                        values=[[value]],
-                    )
-        except Exception as e:
-            self.has_error = True
-            logger.warning("[GSHEET] Lỗi log_koray_columns: %s", str(e))
+        writes = [
+            (HEADER_TO_COL["Macro Context"], macro_context),
+            (HEADER_TO_COL["EAV Table"], eav_table),
+            (HEADER_TO_COL["FS/PAA Map"], fs_paa_map),
+            (HEADER_TO_COL["Source Context Alignment"], source_context_alignment),
+            (HEADER_TO_COL["Koray Quality Score"], quality_score),
+        ]
+        for col_idx, value in writes:
+            if not value:
+                continue
+            try:
+                col_letter = self._col_letter(col_idx)
+                _gsheet_update_with_retry(
+                    self.worksheet,
+                    range_name=f"{col_letter}{row}",
+                    values=[[value]],
+                )
+                time.sleep(0.5)
+            except Exception as e:
+                self.has_error = True
+                logger.warning("[GSHEET] Lỗi log_koray_columns col %s: %s", col_idx, e)
 
     def log_semantic_strategy_columns(
         self,
@@ -389,24 +420,27 @@ class GSheetLogger:
         query_network: str = "",
         context_vectors: str = "",
     ):
-        """Ghi đúng cột E (Semantic Query Network) và L (Context Vectors), không đè F."""
+        """Ghi đúng cột E (Semantic Query Network) và L (Context Vectors) với retry."""
         if not self._connected or row < 1:
             return
-        try:
-            # E = col4 = index 4, L = col11 = index 11
-            if query_network:
-                self.worksheet.update(
-                    range_name=f"{self._col_letter(4)}{row}",
-                    values=[[query_network or "N/A (No Query Network)"]],
+        writes = [
+            (HEADER_TO_COL["Semantic Query Network"], query_network or "N/A (No Query Network)"),
+            (HEADER_TO_COL["Context Vectors & Guidelines"], context_vectors or "N/A (No Context Vectors)"),
+        ]
+        for col_idx, value in writes:
+            if not value:
+                continue
+            try:
+                col_letter = self._col_letter(col_idx)
+                _gsheet_update_with_retry(
+                    self.worksheet,
+                    range_name=f"{col_letter}{row}",
+                    values=[[value]],
                 )
-            if context_vectors:
-                self.worksheet.update(
-                    range_name=f"{self._col_letter(11)}{row}",
-                    values=[[context_vectors or "N/A (No Context Vectors)"]],
-                )
-        except Exception as e:
-            self.has_error = True
-            logger.warning("[GSHEET] Lỗi log_semantic_strategy_columns: %s", str(e))
+                time.sleep(0.5)
+            except Exception as e:
+                self.has_error = True
+                logger.warning("[GSHEET] Lỗi log_semantic_strategy_columns col %s: %s", col_idx, e)
 
     @property
     def is_connected(self) -> bool:
