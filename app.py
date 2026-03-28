@@ -27,6 +27,31 @@ LOCK_FILE = os.path.join(BASE_DIR, "worker_lock.txt")
 ERROR_LOG_PATH = os.path.join(BASE_DIR, "worker_error.log")
 DEFAULT_SHEET_URL = "https://docs.google.com/spreadsheets/d/1i_lgFmoB1LJq2Lt01CwDlOk3hVbQxPiZ4LqGqf8mgwM"
 
+
+def _get_creds_for_gsheet() -> tuple[str | None, bool]:
+    """
+    Phase 36: Lấy credentials path cho GSheet.
+    Priority: Streamlit Secrets (Cloud) > File local (Local).
+    Returns (creds_path, is_cloud_creds).
+    """
+    try:
+        import streamlit as st
+        # Streamlit Cloud: doc tu secrets
+        creds_json = st.secrets.get("GSHEET_CREDS_JSON", None)
+        if creds_json:
+            # Ghi JSON tu secrets ra file tam (cho gspread doc duoc)
+            import tempfile, json as _json
+            tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8")
+            _json.dump(creds_json, tmp, ensure_ascii=False, indent=2)
+            tmp.close()
+            return tmp.name, True
+    except Exception:
+        pass
+    # Local: dung file local
+    if os.path.exists(CREDS_PATH):
+        return CREDS_PATH, False
+    return None, False
+
 IS_CLOUD = bool(os.environ.get("STREAMLIT_SHARING_MODE") or os.environ.get("STREAMLIT_CLOUD"))
 
 st.set_page_config(
@@ -656,7 +681,7 @@ def reset_database(sheet_url: str) -> list[str]:
             messages.append(f"Reset CSV lỗi: {exc}")
 
     glog = GSheetLogger(
-        creds_path=CREDS_PATH if os.path.exists(CREDS_PATH) else None,
+        creds_path=_get_creds_for_gsheet()[0],
         sheet_url=sheet_url,
     )
     if glog.connect():
@@ -710,13 +735,14 @@ def process_cloud_batch_if_needed() -> None:
         from main_generator import _process_single_topic
 
         glog = None
-        if os.path.exists(CREDS_PATH):
+        _creds_path, _ = _get_creds_for_gsheet()
+        if _creds_path:
             glog = GSheetLogger(
-                creds_path=CREDS_PATH,
+                creds_path=_creds_path,
                 sheet_url=st.session_state.batch_sheet_url or DEFAULT_SHEET_URL,
             )
             if not glog.connect():
-                glog = None
+                glog = None  # fallback: GSheet disabled
 
         result = _process_single_topic(
             topic=keyword,
