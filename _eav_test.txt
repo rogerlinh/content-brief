@@ -1,0 +1,9 @@
+| Entity              | Attribute                     | Value                      |
+|---------------------|-------------------------------|----------------------------|
+| Thi quy hang hoa    | Loại hình                     | Quy định                   |
+| Thi quy hang hoa    | Mục đích                      | Quản lý hàng hóa           |
+| Thi quy hang hoa    | Cơ quan quản lý              | Bộ Công Thương             |
+| Thi quy hang hoa    | Quy trình                     | Kiểm tra, đánh giá hàng hóa|
+| Thi quy hang hoa    | Tiêu chuẩn chất lượng         | ISO 9001                   |
+| Thi quy hang hoa    | Đơn vị đo lường              | kg, m3                     |
+| Thi quy hang hoa    | Thời gian hiệu lực            | 5 năm                      |

@@ -1,73 +1,64 @@
 ﻿Keyword,Trạng thái,Search Intent,Macro Context,Semantic Query Network,Top 3 Đối thủ,Content Gaps,EAV Table,PAA Questions,FS/PAA Map,Smart N-Grams,Context Vectors & Guidelines,Structure Outline,Internal Links,Source Context Alignment,Koray Quality Score,Báo cáo phân tích dữ liệu,Full Content Brief
-Thép thanh vằn là gì,✅ Done,informational,"- **Central Entity**: Thép thanh vằn
-- **Macro Context**: Thép thanh vằn là loại thép được sử dụng phổ biến trong xây dựng, có bề mặt gân để tăng độ bám dính với bê tông.
+Thi quỹ hàng hóa,✅ Done,informational,"- **Central Entity**: Thi quỹ hàng hóa
+- **Macro Context**: Thông tin về quy trình và lợi ích của việc tham gia thi quỹ hàng hóa trong giao dịch hàng hóa phái sinh.
 - **Search Intent Type**: Informational
 - **Intent Subtype**: What-is
-- **Người dùng mục tiêu**: Người dùng đang tìm kiếm thông tin để hiểu rõ về đặc điểm và ứng dụng của thép thanh vằn trong xây dựng.",21 keywords fetched,"https://www.thsvc.com.vn/News/Vi/thep-thanh-van-la-gi-tieu-chuan-thong-so-ky-thuat-va-ung-dung-tu-thep-tung-ho
-https://povina.com.vn/truyen-thong/tin-san-pham/thep-thanh-van-la-gi-duoc-ung-dung-trong-xay-dung-ra-sao/
-https://thep.hoaphat.com.vn/tin-cong-nghe/thep-thanh-van.html
-https://thegioithepvn.com/thep-thanh-van-la-gi/?srsltid=AfmBOoq69tCdabmJQkvOTuO_6hK9dFpfL7t6-xnmbxvS9LpDbYiHUJN4
-https://stavianmetal.com/thep-thanh-van/","Bảng dung sai kích thước thép thanh vằn
-Quy trình kiểm định chất lượng thép thanh vằn
-Cảnh báo an toàn khi thi công với thép thanh vằn
-Ảnh hưởng của nhiệt độ đến chất lượng thép thanh vằn
-So sánh giữa thép thanh vằn và các loại thép khác trong xây dựng","| Entity          | Attribute            | Value                     |
-|------------------|----------------------|---------------------------|
-| Thép thanh vằn   | Định nghĩa           | Thép thanh có gân, dùng trong xây dựng |
-| Thép thanh vằn   | Phân loại            | Thép vằn thường, thép vằn chịu lực |
-| Thép thanh vằn   | Đặc điểm kỹ thuật    | Độ bền kéo: 400-600 MPa   |
-| Thép thanh vằn   | Kích thước tiêu chuẩn| 10mm, 12mm, 16mm, 20mm, 25mm (đường kính) |
-| Thép thanh vằn   | Trọng lượng          | 7850 kg/m³                |
-| Thép thanh vằn   | Giá tham khảo        | [CẦN XÁC MINH]            |","Thép thanh vằn là gì và tại sao nó được sử dụng phổ biến trong xây dựng?
-Có những loại thép thanh vằn nào và chúng có đặc điểm gì nổi bật trong việc gia tăng độ bền cho công trình?
-Thép cốt và thép thanh vằn có điểm gì khác nhau về cấu trúc và ứng dụng trong xây dựng?
-Vằn thép được thiết kế như thế nào để tối ưu hóa khả năng chịu lực và chống gãy cho các công trình?
-Trong quá trình sản xuất thép thanh vằn, các yếu tố nào ảnh hưởng đến chất lượng và độ bền của sản phẩm cuối cùng?","| PAA Question | Vị trí (H2/H3) | Format | FS Block (≤40 từ) |
+- **Người dùng mục tiêu**: Những nhà đầu tư cá nhân hoặc doanh nghiệp đang tìm hiểu về thi quỹ hàng hóa để nâng cao kiến thức và đưa ra quyết định đầu tư.",31 keywords fetched,"https://vietnambiz.vn/thi-quy-trader-cap-von-giao-dich-va-chia-se-loi-nhuan-den-90-tu-sact-2026320155732982.htm
+https://giacatloi.vn/trading-chinh-phuc-thi-truong-phai-sinh-hang-hoa/
+https://deriv.com/vi/trading-competitions
+https://litefinance.vn/contests/
+https://mxv.com.vn/giao-dich/ky-quy.html","Quy trình đánh giá hiệu quả thi quỹ
+Chiến lược quản lý rủi ro trong thi quỹ
+Cách xây dựng danh mục đầu tư trong thi quỹ
+Các yếu tố ảnh hưởng đến thành công trong thi quỹ
+Phân tích tâm lý giao dịch trong thi quỹ hàng hóa","| Entity              | Attribute               | Value                |
+|---------------------|-------------------------|----------------------|
+| Thi quỹ hàng hóa    | Định nghĩa              | [CAN XAC MINH]       |
+| Thi quỹ hàng hóa    | Phân loại               | [CAN XAC MINH]       |
+| Thi quỹ hàng hóa    | Đặc điểm kỹ thuật       | [CAN XAC MINH]       |
+| Thi quỹ hàng hóa    | Tỷ lệ ký quỹ [%]       | [CAN XAC MINH]       |
+| Thi quỹ hàng hóa    | Chi phí giao dịch       | [CAN XAC MINH]       |
+| Thi quỹ hàng hóa    | Thời gian đầu tư (năm) | [CAN XAC MINH]       |","Thi quỹ hàng hóa là gì và nó có vai trò như thế nào trong thị trường tài chính hiện nay?
+Những yếu tố nào ảnh hưởng đến kết quả của cuộc thi quỹ hàng hóa và cách chúng được đánh giá?
+So sánh giữa các hình thức thi quỹ hàng hóa khác nhau, như thi giao dịch hàng và thi ký quỹ, thì hình thức nào mang lại lợi ích cao hơn cho người tham gia?
+Các loại hàng hóa nào thường được sử dụng trong thi quỹ hàng hóa tại Việt Nam và sự khác biệt giữa chúng là gì?
+Làm thế nào để quản lý tài khoản và chia sẻ kinh nghiệm giao dịch hàng hóa hiệu quả trong bối cảnh thi quỹ hàng hóa?","| PAA Question | Vị trí (H2/H3) | Format | FS Block (≤40 từ) |
 |---|---|---|---|
-| Thép thanh vằn là gì và tại sao nó được sử dụng phổ biến trong xây dựng? | H2: [MAIN] Thép Thanh Vằn Là Gì? | Snippet | Thép thanh vằn là loại thép cốt có bề mặt gồ ghề, giúp tăng độ bám dính với bê tông, thường được sử dụng trong xây dựng. |
-| Có những loại thép thanh vằn nào và chúng có đặc điểm gì nổi bật trong việc gia tăng độ bền cho công trình? | H2: [MAIN] Phân Loại Thép Thanh Vằn | List | Các loại thép thanh vằn bao gồm thép vằn thường, thép vằn mạ kẽm, mỗi loại có đặc điểm riêng giúp gia tăng độ bền cho công trình. |
-| Thép cốt và thép thanh vằn có điểm gì khác nhau về cấu trúc và ứng dụng trong xây dựng? | H2: [MAIN] So Sánh Giữa Thép Thanh Vằn Và Các Loại Thép Khác Trong Xây Dựng | Snippet | Thép cốt thường có bề mặt nhẵn, trong khi thép thanh vằn có bề mặt gồ ghề, giúp tăng cường độ bám dính trong bê tông. |
-| Vằn thép được thiết kế như thế nào để tối ưu hóa khả năng chịu lực và chống gãy cho các công trình? | H2: [MAIN] Quy Trình Kiểm Định Chất Lượng Thép Thanh Vằn | Snippet | Vằn thép được thiết kế với các rãnh gồ ghề, tối ưu hóa khả năng chịu lực và chống gãy cho các công trình xây dựng. |
-| Trong quá trình sản xuất thép thanh vằn, các yếu tố nào ảnh hưởng đến chất lượng và độ bền của sản phẩm cuối cùng? | H2: [MAIN] Quy Trình Kiểm Định Chất Lượng Thép Thanh Vằn | Snippet | Các yếu tố như nguyên liệu, quy trình sản xuất và kiểm định chất lượng ảnh hưởng trực tiếp đến độ bền của t
-...(truncated)","sản xuất (5)
-xây dựng (5)
-thanh vằn (5)
-thép thanh (5)
-công trình (5)","{'context_vectors': [{'question': 'Thép thanh vằn là gì?', 'intent': 'Tìm hiểu về khái niệm thép thanh vằn'}, {'question': 'Các tiêu chuẩn thép thanh vằn tại nhà máy Thép Tung Ho là gì?', 'intent': 'Tìm hiểu về tiêu chuẩn sản xuất thép thanh vằn'}, {'question': 'Thông số kỹ thuật và phân loại thép thanh vằn là gì?', 'intent': 'Tìm hiểu về thông số và phân loại thép thanh vằn'}, {'question': 'Ứng dụng của thép thanh vằn trong xây dựng là gì?', 'intent': 'Tìm hiểu về ứng dụng của thép thanh vằn'},","H1: Thép Thanh Vằn Là Gì
-H2: [MAIN] Thép Thanh Vằn Là Gì?
-H3: Các yếu tố cốt lõi nhất của Thép Thanh Vằn gồm những gì?
-H2: [MAIN] Phân Loại Thép Thanh Vằn
-H3: Các yếu tố cốt lõi nhất của Thép Thanh Vằn gồm những gì?
-H2: [MAIN] Các Thương Hiệu Thép Vằn Phổ Biến Nhất Hiện Nay
-H3: Các yếu tố cốt lõi nhất của Thép Thanh Vằn gồm những gì?
-H2: [MAIN] Thép Thanh Vằn Hòa Phát
-H3: Các yếu tố cốt lõi nhất của Thép Thanh Vằn gồm những gì?
-H2: [MAIN] Thép Thanh Vằn Pomina
-H3: Các yếu tố cốt lõi nhất của Thép Thanh Vằn gồm những gì?
-H2: [MAIN] Bảng Dung Sai Kích Thước Thép Thanh Vằn
-H3: Các yếu tố cốt lõi nhất của Thép Thanh Vằn gồm những gì?
-H2: [MAIN] Quy Trình Kiểm Định Chất Lượng Thép Thanh Vằn
-H2: [MAIN] Cảnh Báo An Toàn Khi Thi Công Với Thép Thanh Vằn
-H2: [MAIN] Ảnh Hưởng Của Nhiệt Độ Đến Chất Lượng Thép Thanh Vằn
-H2: [MAIN] So Sánh Giữa Thép Thanh Vằn Và Các Loại Thép Khác Trong Xây Dựng
+| Thi quỹ hàng hóa là gì và nó có vai trò như thế nào trong thị trường tài chính hiện nay? | H2: [MAIN] Tổng quan: Thi quỹ hàng hóa là gì? | Snippet | Thi quỹ hàng hóa là hình thức đầu tư tài chính, giúp nhà đầu tư tham gia vào thị trường hàng hóa một cách hiệu quả. |
+| Những yếu tố nào ảnh hưởng đến kết quả của cuộc thi quỹ hàng hóa và cách chúng được đánh giá? | H3: Các yếu tố cốt lõi nhất của Thi Quỹ Hàng Hóa gồm những gì? | Snippet | Kết quả thi quỹ hàng hóa bị ảnh hưởng bởi biến động thị trường, chiến lược giao dịch và quản lý rủi ro. |
+| So sánh giữa các hình thức thi quỹ hàng hóa khác nhau, như thi giao dịch hàng và thi ký quỹ, thì hình thức nào mang lại lợi ích cao hơn cho người tham gia? | H2: [MAIN] Các đặc điểm cấu tạo nổi bật nhất | Table | Thi giao dịch hàng thường mang lại lợi ích cao hơn so với thi ký quỹ do tính linh hoạt và tiềm năng sinh lời lớn hơn. |
+| Các loại hàng hóa nào thường được sử dụng trong thi quỹ hàng hóa tại Việt Nam và sự khác biệt giữa chúng là gì? | H3: Thông số kỹ thuật và phân loại của ứng dụng thực tiễn trong đời sống và xây dựng? | List | Các loại hàng hóa phổ biến bao gồm nông sản, kim loại và năng lượng, mỗi loại có đặc điểm và rủi ro riêng. |
+| Làm thế nào để quản lý tài khoản và chia sẻ kinh nghiệm giao dịch hàng hóa hiệu quả trong bối cảnh thi quỹ hàng hóa? | H2: [SUPP] Câu hỏi thường gặp (FAQ) | Snippet | Quản lý tài khoản hiệu quả cần theo dõi thường 
+...(truncated)","giao dịch (3)
+hàng hóa (2)
+giá trị (2)
+cuộc thi (2)
+gia cuộc (2)","Nguyên tắc 1: Viết câu đầu tiên ngay sau Heading H2/H3 phải trả lời trực tiếp nội dung Heading đó. | Nguyên tắc 2: Sử dụng thông tin phản hồi nhanh gọn, đi thẳng vào vấn đề để tăng độ rõ ràng. | Nguyên tắc 3: Xưng hô 'Tôi' hoặc 'Chúng tôi' để tăng tính E-E-A-T trong nội dung.","H1: Thi Quỹ Hàng Hóa
+H2: [MAIN] Tổng quan: Thi quỹ hàng hóa là gì?
+H3: Các yếu tố cốt lõi nhất của Thi Quỹ Hàng Hóa gồm những gì?
+H2: [MAIN] Các đặc điểm cấu tạo nổi bật nhất
+H3: Đặc điểm đáng lưu ý của các đặc điểm cấu tạo nổi bật nhất là gì?
+H2: [MAIN] Ứng dụng thực tiễn trong đời sống và xây dựng
+H3: Thông số kỹ thuật và phân loại của ứng dụng thực tiễn trong đời sống và xây dựng?
+H2: [MAIN] Những lưu ý quan trọng khi chọn mua và sử dụng
 H2: [SUPP] Câu hỏi thường gặp (FAQ)
-H2: [SUPP] Thép thanh vằn là gì: Những trường hợp không nên sử dụng","Node: thép hình là gì (thép hình là gì?)
-Node: thép hộp là gì (thép hộp là gì?)
-Node: thép tấm là gì (thép tấm là gì?)
-Node: thép ống là gì (thép ống là gì?)
-Node: thép mạ kẽm là gì (thép mạ kẽm là gì?)","## 🎯 SOURCE CONTEXT ALIGNMENT CHECKLIST
+H2: [SUPP] Thi quỹ hàng hóa: Những trường hợp không nên sử dụng","Node: trọng lượng thép ống (trọng lượng thép ống)
+Node: thép cầu vĩnh tuy (thép cầu vĩnh tuy)
+Node: so sánh thép cán nóng và cán nguội (so sánh thép cán nóng và cán nguội)
+Node: khác biệt giữa thép hình I và H (khác biệt giữa thép hình I và H)
+Node: báo giá thép xây dựng hôm nay (báo giá thép xây dựng hôm nay)","## 🎯 SOURCE CONTEXT ALIGNMENT CHECKLIST
 
-✅ **Brand mention**: 'Thép Trần Long' có xuất hiện trong brief
-✅ **GEO Keywords**: Tìm thấy (Miền Bắc)
+✅ **Brand mention**: 'SACT' có xuất hiện trong brief
+✅ **GEO Keywords**: Tìm thấy (giao dịch hàng hóa phái sinh Hà Nội,  mở tài khoản hàng hóa phái sinh Hoàng Mai,  giao dịch hàng hóa phái sinh Định Công)
 ✅ **Supplement Section**: Có [SUPP] heading
-✅ **NAP Hotline**: Có tìm thấy hotline '+84) 936179626' trong brief
+✅ **NAP Hotline**: Có tìm thấy hotline '024 7304 6968, 086 5450 045, (094) 543 5430.' trong brief
 ✅ **Competitor Brand Rule**: Không vi phạm
 
-**Điểm Alignment: 4/4** (Tốt)","## 📊 KORAY QUALITY SCORE: **78/100** (Grade B)
+**Điểm Alignment: 4/4** (Tốt)","## 📊 KORAY QUALITY SCORE: **74/100** (Grade B)
 
 | Tiêu chí | Điểm |
 |----------|------|
-| ✅ 1. Contextual Vector | 10/10 |
+| ❌ 1. Contextual Vector | 0/10 |
 | ⚠️ 2. Contextual Hierarchy (H3) | 7/10 |
 | ✅ 3. FS Blocks (≤60 từ) | 10/10 |
 | ✅ 4. PAA Mapping | 10/10 |
@@ -75,201 +66,14 @@ Node: thép mạ kẽm là gì (thép mạ kẽm là gì?)","## 🎯 SOURCE CONT
 | ✅ 6. EAV Coverage | 10/10 |
 | ✅ 7. Source Context Alignment | 10/10 |
 | ✅ 8. Internal Link Logic | 10/10 |
-| ✅ 9. Sapo Quality | 10/10 |
-| ✅ 10. Attribute Filtration (H2 count) | 10/10 |
-| ❌ 11. Per-H2 Guidance (Word Count) | 0/10 |
-
-### ❌ Các vấn đề phát hiện:
-- ❌ STRICT PENALTY: Có 1 FS snippet quá dài (> 60 từ). Trừ 10 điểm tổng.","# BÁO CÁO PHÂN TÍCH & CONTENT BRIEF: Thép thanh vằn là gì
-
-> **Ngày tạo**: Auto-generated by Content Brief Generator
-
----
-
-# PHẦN 1: ACTIONABLE CONTENT BRIEF
-
-## 1. Meta Information
-
-| Hạng mục | Nội dung |
-|---|---|
-| **Title Tag** | Thép Thanh Vằn Là Gì | Hướng Dẫn Chi Tiết [2026] |
-| **Meta Description** | Tìm hiểu thép thanh vằn là gì chi tiết: đặc điểm, phân loại, ứng dụng và lưu ý quan trọng. Cập nhật 2026. |
-| **Target Keyword** | Thép thanh vằn là gì |
-| **Central Entity** | Thép thanh vằn |
-
-## 2. Semantic Outline
-
-> ✅ Outline từ dữ liệu thực tế (PAA + Competitor + Content Gaps)
-
-**Thép Thanh Vằn Là Gì**
-- 🟢 **[MAIN]** Thép Thanh Vằn Là Gì?
-  - ↳ Các yếu tố cốt lõi nhất của Thép Thanh Vằn gồm những gì?
-- 🟢 **[MAIN]** Phân Loại Thép Thanh Vằn
-  - ↳ Các yếu tố cốt lõi nhất của Thép Thanh Vằn gồm những gì?
-- 🟢 **[MAIN]** Các Thương Hiệu Thép Vằn Phổ Biến Nhất Hiện Nay
-  - ↳ Các yếu tố cốt lõi nhất của Thép Thanh Vằn gồm những gì?
-- 🟢 **[MAIN]** Thép Thanh Vằn Hòa Phát
-  - ↳ Các yếu tố cốt lõi nhất của Thép Thanh Vằn gồm những gì?
-- 🟢 **[MAIN]** Thép Thanh Vằn Pomina
-  - ↳ Các yếu tố cốt lõi nhất của Thép Thanh Vằn gồm những gì?
-- 🟢 **[MAIN]** Bảng Dung Sai Kích Thước Thép Thanh Vằn
-  - ↳ Các yếu tố cốt lõi nhất của Thép Thanh Vằn gồm những gì?
-- 🟢 **[MAIN]** Quy Trình Kiểm Định Chất Lượng Thép Thanh Vằn
-- 🟢 **[MAIN]** Cảnh Báo An Toàn Khi Thi Công Với Thép Thanh Vằn
-- 🟢 **[MAIN]** Ảnh Hưởng Của Nhiệt Độ Đến Chất Lượng Thép Thanh Vằn
-- 🟢 **[MAIN]** So Sánh Giữa Thép Thanh Vằn Và Các Loại Thép Khác Trong Xây Dựng
-- 🟡 **[SUPP]** Câu hỏi thường gặp (FAQ)
-- 🟡 **[SUPP]** Thép thanh vằn là gì: Những trường hợp không nên sử dụng
-
-> ✅ H3 Ratio: 6 H3 / 12 H2 = 50% (chuẩn ≥50%)
-
-## 3. Hướng Dẫn Viết Chi Tiết
-
-> Mỗi H2 được hướng dẫn cụ thể: Snippet → Phân tích → Information Gain → Bridge
-
-### 📝 SAPO (Đoạn mở đầu)
-*Intent: Giới thiệu tổng quan về thép thanh vằn.*
-
-**SAPO (80-120 từ) — Câu mở đầu định nghĩa + Brand + Liệt kê H2:** Thép thanh vằn là loại thép xây dựng có bề
-...(Xem full trong file MD)","# PHẦN 2: METHODOLOGY & WRITING GUIDELINES
-# BÁO CÁO PHÂN TÍCH: Thép thanh vằn là gì
-
-## 1. Trục Chiến Lược (Core Strategy)
-
-- **Search Intent**: Informational — Người dùng muốn TÌM HIỂU thông tin, kiến thức.
-- **Methodology**: Bạn là một Content Writer chuyên nghiệp
-- **Cấu trúc**: 12 H2 (17% là Supplement Content). 6 H3 (Ratio: 50%).
-
-## 2. Dữ liệu SERP & Đối Thủ
-
-### Top 5 Đối thủ phân tích
-| # | URL | Headings | Words |
-|---|---|---|---|
-| 1 | https://www.thsvc.com.vn/News/Vi/thep-thanh-van-la-gi-tieu-c... | 9 | 1,701 |
-| 2 | https://povina.com.vn/truyen-thong/tin-san-pham/thep-thanh-v... | 12 | 1,433 |
-| 3 | https://thep.hoaphat.com.vn/tin-cong-nghe/thep-thanh-van.htm... | 10 | 1,291 |
-| 4 | https://thegioithepvn.com/thep-thanh-van-la-gi/?srsltid=AfmB... | 19 | 1,036 |
-| 5 | https://stavianmetal.com/thep-thanh-van/ | 31 | 2,442 |
-
-### Khai thác & Mở rộng
-**Semantic Voids (Rare Headings):**
-- Bảng dung sai kích thước thép thanh vằn
-- Quy trình kiểm định chất lượng thép thanh vằn
-- Cảnh báo an toàn khi thi công với thép thanh vằn
-- Ảnh hưởng của nhiệt độ đến chất lượng thép thanh vằn
-- So sánh giữa thép thanh vằn và các loại thép khác trong xây dựng
-
-## 3. Semantic Keyword Network (Clusters)
-
-*(Từ 21 keyword ban đầu → 21 keyword cốt lõi)*
-
-- **Giá thép thanh vằn** (Commercial): 
-- **Thông tin về thép thanh vằn** (Informational): 
-- **Kích thước thép thanh vằn** (Informational): 
-- **Thép thanh vằn Vas** (Informational): 
-- **So sánh thép với nhôm** (Informational): 
-
-## 4. E-E-A-T & Quality Checks
-
-**Source Context Alignment (Độ khớp với website):**
-## 🎯 SOURCE CONTEXT ALIGNMENT CHECKLIST
-
-✅ **Brand mention**: 'Thép Trần Long' có xuất hiện trong brief
-✅ **GEO Keywords**: Tìm thấy (Miền Bắc)
-✅ **Supplement Section**: Có [SUPP] heading
-✅ **NAP Hotline**: Có tìm thấy hotline '+84) 936179626' trong brief
-✅ **Competitor Brand Rule**: Không vi phạm
-
-**Điểm Alignment: 4/4** (Tốt)
-
-**E-E-A-T Tasks:**
-- [ ] **Experience (Kinh nghiệm)**: Chia sẻ kinh nghiệm thi công, lắp đ
-...(Xem full trong file MD)"
-so sánh thép thanh vằn và thép hình,✅ Done,commercial,"- **Central Entity**: Thép thanh vằn, thép hình
-- **Macro Context**: So sánh giữa thép thanh vằn và thép hình trong xây dựng và ứng dụng công nghiệp.
-- **Search Intent Type**: Commercial
-- **Intent Subtype**: vs
-- **Người dùng mục tiêu**: Những nhà thầu xây dựng hoặc kỹ sư đang tìm hiểu về sự khác biệt và ưu nhược điểm giữa thép thanh vằn và thép hình để đưa ra quyết định mua sắm.",23 keywords fetched,"http://ongthephoaphat.net/so-sanh-thep-cuon-va-thep-van.html
-https://satthepmanhphat.com/so-sanh-cac-loai-mac-thep-thuong-dung-trong-xay-dung.html
-https://thepcongnghiep.com.vn/so-sanh-thep-cuon-va-thep-van-a94.html
-https://baotuyenquang.com.vn/top-5-loai-sat-thep-xay-dung-tot-nhat-hien-nay-192403.html
-https://thep.hoaphat.com.vn/tin-cong-nghe/thep-duoc-chia-thanh-may-loai.html","So sánh độ bền thép thanh vằn và thép hình
-Ứng dụng thực tế của thép thanh vằn
-Tính toán trọng lượng thép hình cho công trình
-Đặc điểm chống ăn mòn của thép hình
-Phân tích chi phí dài hạn giữa thép thanh vằn và thép hình","| Entity                     | Attribute              | Value              |
-|----------------------------|------------------------|--------------------|
-| Thép thanh vằn            | Định nghĩa             | Thép có gân, dùng trong xây dựng để gia tăng độ bám dính với bê tông. |
-| Thép thanh vằn            | Phân loại              | Thép vằn có nhiều loại như thép vằn phổ thông, thép vằn chịu lực. |
-| Thép thanh vằn            | Đặc điểm kỹ thuật      | Độ bền kéo: 400-600 MPa; Độ giãn dài: ≥ 14%. |
-| Thép thanh vằn            | Kích thước tiêu chuẩn  | 10mm, 12mm, 16mm, 20mm, 25mm, 32mm (đường kính). |
-| Thép thanh vằn            | Trọng lượng            | 7850 kg/m³ (mật độ thép). |
-| Thép thanh vằn            | Giá tham khảo          | [CẦN XÁC MINH]     |
-| Thép hình                  | Định nghĩa             | Thép có hình dạng đặc biệt như chữ H, chữ I, chữ U, dùng trong kết cấu xây dựng. |
-| Thép hình                  | Phân loại              | Thép hình H, thép hình I, thép hình U, thép hình V. |
-| Thép hình                  | Đặc điểm kỹ thuật      | Độ bền kéo: 300-500 MPa; Độ giãn dài: ≥ 20%. |
-| Thép hình                  | Kích thước tiêu chuẩn  | Chiều cao: 100mm-300mm; Chiều rộng: 50mm-150mm (tùy loại). |
-| Thép hình                  | Trọng lượng            | 7850 kg/m³ (mật độ thép). |
-| Thép hình                  | Giá tham khảo          | [CẦN XÁC MINH]     |","Thép thanh vằn là gì và nó có những đặc điểm nổi bật nào so với thép hình trong xây dựng?
-Những ứng dụng cụ thể nào của thép thanh vằn khiến nó trở thành lựa chọn ưu việt hơn so với thép hình trong các công trình xây dựng?
-So với thép hình, thép thanh vằn có độ bền và khả năng chịu lực như thế nào trong các điều kiện khắc nghiệt?
-Trong các loại thép xây dựng, thép thanh vằn và thép hình có sự khác biệt nào về quy trình sản xuất và chi phí?
-Thép cuộn có thể được sử dụng thay thế cho thép thanh vằn hay thép hình không, và nếu có thì ưu nhược điểm của nó là gì?","| PAA Question | Vị trí (H2/H3) | Format | FS Block (≤40 từ) |
-|---|---|---|---|
-| Thép thanh vằn là gì và nó có những đặc điểm nổi bật nào so với thép hình trong xây dựng? | H3: Các yếu tố cốt lõi nhất của So Sánh Thép Thanh Vằn Và Thép Hình gồm những gì? | Snippet | Thép thanh vằn là loại thép có gân, giúp tăng độ bám dính với bê tông, khác với thép hình có bề mặt trơn. |
-| Những ứng dụng cụ thể nào của thép thanh vằn khiến nó trở thành lựa chọn ưu việt hơn so với thép hình trong các công trình xây dựng? | H3: Đặc điểm đáng lưu ý của ứng dụng thực tế của thép thanh vằn là gì? | List | Thép thanh vằn thường được sử dụng trong móng, cột và dầm, nơi cần độ bền cao và khả năng chịu lực tốt. |
-| So với thép hình, thép thanh vằn có độ bền và khả năng chịu lực như thế nào trong các điều kiện khắc nghiệt? | H2: [MAIN] So Sánh Độ Bền Thép Thanh Vằn Và Thép Hình | Snippet | Thép thanh vằn có độ bền cao hơn thép hình, đặc biệt trong môi trường khắc nghiệt nhờ vào cấu trúc gân. |
-| Trong các loại thép xây dựng, thép thanh vằn và thép hình có sự khác biệt nào về quy trình sản xuất và chi phí? | H2: [MAIN] Phân Tích Chi Phí Dài Hạn Giữa Thép Thanh Vằn Và Thép Hình | Snippet | Thép thanh vằn thường có chi phí sản xuất thấp hơn do quy trình đơn giản hơn so với thép hình. |
-| Thép cuộn có thể được sử dụng thay thế cho thép thanh vằn hay thép hình không, và nếu có thì ưu nhược điểm của nó là gì? | H2: [SUPP] Khi nào và thép thanh vằn có thể thay thế nhau? | Snippet | Thép cuộn có thể thay th
-...(truncated)","hòa phát (5)
-sản phẩm (5)
-ống thép (5)
-tiêu chuẩn (5)
-thép cuộn (4)","{'context_vectors': [{'question': 'Thép thanh vằn là gì và có những đặc điểm gì?', 'intent': 'Tìm hiểu về thép thanh vằn'}, {'question': 'Thép hình là gì và có những loại nào?', 'intent': 'Tìm hiểu về thép hình'}, {'question': 'Sự khác biệt giữa thép thanh vằn và thép hình là gì?', 'intent': 'So sánh thép thanh vằn và thép hình'}, {'question': 'Thép thanh vằn có ứng dụng gì trong xây dựng?', 'intent': 'Tìm hiểu ứng dụng của thép thanh vằn'}, {'question': 'Thép hình có ứng dụng gì trong xây dựng?","H1: So Sánh Thép Thanh Vằn Và Thép Hình
-H2: [MAIN] So Sánh Thép Cuộn Và Thép Vằn
-H3: Các yếu tố cốt lõi nhất của So Sánh Thép Thanh Vằn Và Thép Hình gồm những gì?
-H2: [MAIN] Thép Hòa Phát
-H3: Đặc điểm đáng lưu ý của thép hòa phát là gì?
-H2: [MAIN] So Sánh Độ Bền Thép Thanh Vằn Và Thép Hình
-H3: Các yếu tố cốt lõi nhất của So Sánh Thép Thanh Vằn Và Thép Hình gồm những gì?
-H2: [MAIN] Ứng Dụng Thực Tế Của Thép Thanh Vằn
-H3: Đặc điểm đáng lưu ý của ứng dụng thực tế của thép thanh vằn là gì?
-H2: [MAIN] Tính Toán Trọng Lượng Thép Hình Cho Công Trình
-H2: [MAIN] Đặc Điểm Chống Ăn Mòn Của Thép Hình
-H2: [MAIN] Phân Tích Chi Phí Dài Hạn Giữa Thép Thanh Vằn Và Thép Hình
-H2: [SUPP] Câu hỏi thường gặp (FAQ)
-H2: [SUPP] Khi nào  và thép thanh vằn có thể thay thế nhau?","Node: so sánh thép cán nóng và cán nguội (so sánh thép cán nóng và cán nguội)
-Node: thép thanh vằn là gì (thép thanh vằn là gì?)
-Node: thép tròn trơn và thép vằn (thép tròn trơn và thép vằn)
-Node: so sánh các loại thép xây dựng (so sánh các loại thép xây dựng)
-Node: so sánh tôn mạ màu và tôn lạnh (so sánh tôn mạ màu và tôn lạnh)","## 🎯 SOURCE CONTEXT ALIGNMENT CHECKLIST
-
-✅ **Brand mention**: 'Thép Trần Long' có xuất hiện trong brief
-✅ **GEO Keywords**: Tìm thấy (Miền Bắc)
-✅ **Supplement Section**: Có [SUPP] heading
-✅ **NAP Hotline**: Có tìm thấy hotline '+84) 936179626' trong brief
-✅ **Competitor Brand Rule**: Không vi phạm
-
-**Điểm Alignment: 4/4** (Tốt)","## 📊 KORAY QUALITY SCORE: **50/100** (Grade D)
-
-| Tiêu chí | Điểm |
-|----------|------|
-| ❌ 1. Contextual Vector | 0/10 |
-| ❌ 2. Contextual Hierarchy (H3) | 3/10 |
-| ✅ 3. FS Blocks (≤60 từ) | 10/10 |
-| ✅ 4. PAA Mapping | 10/10 |
-| ✅ 5. Main/Supp Split | 10/10 |
-| ✅ 6. EAV Coverage | 10/10 |
-| ✅ 7. Source Context Alignment | 10/10 |
-| ✅ 8. Internal Link Logic | 10/10 |
-| ✅ 9. Sapo Quality | 10/10 |
+| ⚠️ 9. Sapo Quality | 5/10 |
 | ✅ 10. Attribute Filtration (H2 count) | 10/10 |
 | ❌ 11. Per-H2 Guidance (Word Count) | 0/10 |
 
 ### ❌ Các vấn đề phát hiện:
 - ❌ 2 heading generic không đủ cụ thể
-- ❌ STRICT PENALTY: Chỉ 44% H2 có triển khai H3 (chuẩn ≥50%). Trừ 15 điểm tổng.
-- ❌ STRICT PENALTY: Có 1 FS snippet quá dài (> 60 từ). Trừ 10 điểm tổng.","# BÁO CÁO PHÂN TÍCH & CONTENT BRIEF: so sánh thép thanh vằn và thép hình
+- ⚠️ Có 1 FS snippet khá dài (> 60 từ). Cân nhắc rút gọn để tối ưu Featured Snippet.
+- ⚠️ Sapo có 166 từ (chuẩn 80-120, dung sai 56-156 từ)","# BÁO CÁO PHÂN TÍCH & CONTENT BRIEF: Thi quỹ hàng hóa
 
 > **Ngày tạo**: Auto-generated by Content Brief Generator
 
@@ -281,91 +85,94 @@ Node: so sánh tôn mạ màu và tôn lạnh (so sánh tôn mạ màu và tôn 
 
 | Hạng mục | Nội dung |
 |---|---|
-| **Title Tag** | So Sánh Thép Thanh Vằn Và Thép Hình [2026] |
-| **Meta Description** | Tìm hiểu so sánh thép thanh vằn và thép hình chi tiết: đặc điểm, phân loại, ứng dụng và lưu ý quan trọng. Cập nhật 2026. |
-| **Target Keyword** | so sánh thép thanh vằn và thép hình |
-| **Central Entity** | thép thanh vằn, thép hình |
+| **Title Tag** | Thi Quỹ Hàng Hóa | Hướng Dẫn Chi Tiết [2026] |
+| **Meta Description** | Tìm hiểu thi quỹ hàng hóa chi tiết: đặc điểm, phân loại, ứng dụng và lưu ý quan trọng. Cập nhật 2026. |
+| **Target Keyword** | Thi quỹ hàng hóa |
+| **Central Entity** | Thi quỹ hàng hóa |
 
 ## 2. Semantic Outline
 
 > ✅ Outline từ dữ liệu thực tế (PAA + Competitor + Content Gaps)
 
-**So Sánh Thép Thanh Vằn Và Thép Hình**
-- 🟢 **[MAIN]** So Sánh Thép Cuộn Và Thép Vằn
-  - ↳ Các yếu tố cốt lõi nhất của So Sánh Thép Thanh Vằn Và Thép Hình gồm những gì?
-- 🟢 **[MAIN]** Thép Hòa Phát
-  - ↳ Đặc điểm đáng lưu ý của thép hòa phát là gì?
-- 🟢 **[MAIN]** So Sánh Độ Bền Thép Thanh Vằn Và Thép Hình
-  - ↳ Các yếu tố cốt lõi nhất của So Sánh Thép Thanh Vằn Và Thép Hình gồm những gì?
-- 🟢 **[MAIN]** Ứng Dụng Thực Tế Của Thép Thanh Vằn
-  - ↳ Đặc điểm đáng lưu ý của ứng dụng thực tế của thép thanh vằn là gì?
-- 🟢 **[MAIN]** Tính Toán Trọng Lượng Thép Hình Cho Công Trình
-- 🟢 **[MAIN]** Đặc Điểm Chống Ăn Mòn Của Thép Hình
-- 🟢 **[MAIN]** Phân Tích Chi Phí Dài Hạn Giữa Thép Thanh Vằn Và Thép Hình
+**Thi Quỹ Hàng Hóa**
+- 🟢 **[MAIN]** Tổng quan: Thi quỹ hàng hóa là gì?
+  - ↳ Các yếu tố cốt lõi nhất của Thi Quỹ Hàng Hóa gồm những gì?
+- 🟢 **[MAIN]** Các đặc điểm cấu tạo nổi bật nhất
+  - ↳ Đặc điểm đáng lưu ý của các đặc điểm cấu tạo nổi bật nhất là gì?
+- 🟢 **[MAIN]** Ứng dụng thực tiễn trong đời sống và xây dựng
+  - ↳ Thông số kỹ thuật và phân loại của ứng dụng thực tiễn trong đời sống và xây dựng?
+- 🟢 **[MAIN]** Những lưu ý quan trọng khi chọn mua và sử dụng
 - 🟡 **[SUPP]** Câu hỏi thường gặp (FAQ)
-- 🟡 **[SUPP]** Khi nào  và thép thanh vằn có thể thay thế nhau?
+- 🟡 **[SUPP]** Thi quỹ hàng hóa: Những trường hợp không nên sử dụng
 
-> ⚠️ H3 Ratio: 4 H3 / 9 H2 = 44% (chuẩn ≥50%)
+> ✅ H3 Ratio: 3 H3 / 6 H2 = 50% (chuẩn ≥50%)
 
-## 3. Hướng Dẫn Viết Chi Tiết
+> **🎯 H3 Micro-Briefing (Koray: Mỗi H3 có hướng dẫn riêng):**
 
-> Mỗi H2 được hướng dẫn cụ thể: Snippet → Phân tích → Information Gain → Bridge
+- **H3: Các yếu tố cốt lõi nhất của Thi Quỹ Hàng Hóa gồm những gì?**
+  ↳ Viết 80-150 từ. Bắt đầu bằng câu trả lời trực tiếp câu hỏi H3. Có số liệu kỹ thuật cụ thể.
 
-### 📝 SAPO (Đoạn mở đầu)
-*Intent: Giới thiệu tổng quan về sự so sánh giữa thép thanh vằn và thép hình.*
+- **H3: Đặc điểm đáng lưu ý của các đặc điểm cấu tạo nổi bật nhất là gì?**
+  ↳ Viết 80-150 từ. Bắt đầu bằng câu trả lời trực tiếp câu hỏi H3. Có số liệu kỹ thuật cụ thể.
 
-**SAPO (80-120 từ) — Câu mở đầu định nghĩa + Brand + Liệt kê H2:** Thép thanh vằn và thép hình đều là vật liệu quan trọng trong xây dựng. Thép Trần Long — đơn vị chuyên thương mại – phân phối thép xây dựng và thép công nghiệp (thép hình, thép tấm, thép ống, thép hộp, xà gồ, thép trò
+- **H3: Thông số kỹ thuật và phân loại của ứng dụng thực tiễn trong đời sống và xây dựng?**
+  ↳ Viết 80-150 từ. Bắt đầu bằng câu trả lời trực tiếp câu hỏi H3. Có số liệu kỹ thuật cụ thể.
+
+## 3. Bảng Phân Tích Koray
+
+> Nhung phan tich chuyen su thu 4 (Chi phi Toc thoi - Thu thuat Tot nhat): EAV Table, Macro Context, FS/PAA Map, Source Context Alignment.
+
+### E. EAV Table (Entity - Attribute - Va
 ...(Xem full trong file MD)","# PHẦN 2: METHODOLOGY & WRITING GUIDELINES
-# BÁO CÁO PHÂN TÍCH: so sánh thép thanh vằn và thép hình
+# BÁO CÁO PHÂN TÍCH: Thi quỹ hàng hóa
 
 ## 1. Trục Chiến Lược (Core Strategy)
 
-- **Search Intent**: Comparison (VS) — Người dùng muốn SO SÁNH 2 hoặc nhiều đối tượng.
-- **Methodology**: Bạn là một chuyên gia phân tích khách quan và chi tiết
-- **Cấu trúc**: 9 H2 (22% là Supplement Content). 4 H3 (Ratio: 44%).
+- **Search Intent**: Informational — Người dùng muốn TÌM HIỂU thông tin, kiến thức.
+- **Methodology**: Bạn là một Content Writer chuyên nghiệp
+- **Cấu trúc**: 6 H2 (33% là Supplement Content). 3 H3 (Ratio: 50%).
 
 ## 2. Dữ liệu SERP & Đối Thủ
 
 ### Top 5 Đối thủ phân tích
 | # | URL | Headings | Words |
 |---|---|---|---|
-| 1 | http://ongthephoaphat.net/so-sanh-thep-cuon-va-thep-van.html | 16 | 349 |
-| 2 | https://satthepmanhphat.com/so-sanh-cac-loai-mac-thep-thuong... | 24 | 2,583 |
-| 3 | https://thepcongnghiep.com.vn/so-sanh-thep-cuon-va-thep-van-... | 22 | 440 |
-| 4 | https://baotuyenquang.com.vn/top-5-loai-sat-thep-xay-dung-to... | 24 | 824 |
-| 5 | https://thep.hoaphat.com.vn/tin-cong-nghe/thep-duoc-chia-tha... | 11 | 1,404 |
+| 1 | https://vietnambiz.vn/thi-quy-trader-cap-von-giao-dich-va-ch... | 9 | 18 |
+| 2 | https://giacatloi.vn/trading-chinh-phuc-thi-truong-phai-sinh... | 13 | 811 |
+| 3 | https://deriv.com/vi/trading-competitions | 0 | 0 |
+| 4 | https://litefinance.vn/contests/ | 7 | 747 |
+| 5 | https://mxv.com.vn/giao-dich/ky-quy.html | 2 | 529 |
 
 ### Khai thác & Mở rộng
 **Semantic Voids (Rare Headings):**
-- So sánh độ bền thép thanh vằn và thép hình
-- Ứng dụng thực tế của thép thanh vằn
-- Tính toán trọng lượng thép hình cho công trình
-- Đặc điểm chống ăn mòn của thép hình
-- Phân tích chi phí dài hạn giữa thép thanh vằn và thép hình
+- Quy trình đánh giá hiệu quả thi quỹ
+- Chiến lược quản lý rủi ro trong thi quỹ
+- Cách xây dựng danh mục đầu tư trong thi quỹ
+- Các yếu tố ảnh hưởng đến thành công trong thi quỹ
+- Phân tích tâm lý giao dịch trong thi quỹ hàng hóa
 
 ## 3. Semantic Keyword Network (Clusters)
 
-*(Từ 23 keyword ban đầu → 23 keyword cốt lõi)*
+*(Từ 31 keyword ban đầu → 31 keyword cốt lõi)*
 
-- **Hướng dẫn chọn thép** (Informational): 
-- **Giá thép hình** (Commercial): 
-- **Mua thép hình** (Transactional): 
-- **Thông tin về thép thanh vằn** (Informational): 
+- **Hướng dẫn thi quỹ** (Informational): 
+- **Có nên thi quỹ** (Informational): 
+- **Giá thi quỹ** (Commercial): 
+- **Thông tin về quỹ hàng hóa** (Informational): 
 
 ## 4. E-E-A-T & Quality Checks
 
 **Source Context Alignment (Độ khớp với website):**
 ## 🎯 SOURCE CONTEXT ALIGNMENT CHECKLIST
 
-✅ **Brand mention**: 'Thép Trần Long' có xuất hiện trong brief
-✅ **GEO Keywords**: Tìm thấy (Miền Bắc)
+✅ **Brand mention**: 'SACT' có xuất hiện trong brief
+✅ **GEO Keywords**: Tìm thấy (giao dịch hàng hóa phái sinh Hà Nội,  mở tài khoản hàng hóa phái sinh Hoàng Mai,  giao dịch hàng hóa phái sinh Định Công)
 ✅ **Supplement Section**: Có [SUPP] heading
-✅ **NAP Hotline**: Có tìm thấy hotline '+84) 936179626' trong brief
+✅ **NAP Hotline**: Có tìm thấy hotline '024 7304 6968, 086 5450 045, (094) 543 5430.' trong brief
 ✅ **Competitor Brand Rule**: Không vi phạm
 
 **Điểm Alignment: 4/4** (Tốt)
 
 **E-E-A-T Tasks:**
-- [ ] **Experience (Kinh nghiệm)**: Chia sẻ kinh nghiệm thi công, lắp đặt thực tế. Mô tả quy trình và lưu ý an toàn.
--
+- [ ] **Experience (Kinh nghiệm)**: Chia sẻ kinh nghiệm thực tế khi tham gia thị trường hàng hóa phái sinh. Mô tả
 ...(Xem full trong file MD)"

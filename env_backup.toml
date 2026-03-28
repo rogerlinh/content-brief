@@ -1,0 +1,5 @@
+# Điền API Key của bạn vào đây, ví dụ: "sk-proj-..."
+OPENAI_API_KEY = "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"
+
+# Điền API Key của Serper.dev vào đây
+SERPER_API_KEY = "a039713276f0a59789f58686346d99cde6792a6d"

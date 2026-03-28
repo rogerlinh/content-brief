@@ -1,0 +1,5 @@
+- **Central Entity**: Thi quy hang hoa
+- **Macro Context**: Quy định và hướng dẫn liên quan đến việc thi quy hàng hóa trong lĩnh vực logistics và thương mại.
+- **Search Intent Type**: Informational
+- **Intent Subtype**: What-is
+- **Người dùng mục tiêu**: Những người làm trong ngành logistics, thương mại hoặc sinh viên tìm hiểu về quy định thi quy hàng hóa.

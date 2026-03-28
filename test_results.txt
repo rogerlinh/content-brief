@@ -44,7 +44,7 @@
 === Fix 5: Koray Prominence Penalty ===
   [PASS] Returns a string (markdown table)
   [PASS] Contains PROMINENCE PENALTY
-  Score output (first 300 chars): ## 📊 KORAY QUALITY SCORE: **43/100** (Grade D)
+  Score output (first 300 chars): ## 📊 KORAY QUALITY SCORE: **23/100** (Grade F)
 
 | Tiêu chí | Điểm |
 |----------|------|
