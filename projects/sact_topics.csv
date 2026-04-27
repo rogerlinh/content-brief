@@ -1,0 +1,51 @@
+Keyword,Cluster,Role,Intent,Parent,Notes
+Thi quỹ hàng hóa là gì,Root,ROOT,informational,,Central topic of the project
+Thi quỹ hàng hóa có hợp pháp không,Regulation,MAIN,informational,Thi quỹ hàng hóa là gì,Clarify legal status in the commodity derivatives context
+Thi quỹ hàng hóa hoạt động như thế nào,Core Concept,MAIN,informational,Thi quỹ hàng hóa là gì,Explain operating model and process
+Thi quỹ hàng hóa phù hợp với ai,Persona,MAIN,informational,Thi quỹ hàng hóa là gì,Match user intent to target customers
+Thi quỹ hàng hóa khác gì giao dịch hàng hóa phái sinh,Comparison,MAIN,comparative,Thi quỹ hàng hóa là gì,Distinguish the model from direct trading
+Thi quỹ hàng hóa có rủi ro gì,Risk,MAIN,informational,Thi quỹ hàng hóa là gì,Cover loss scenarios and risk control
+Cách tham gia thi quỹ hàng hóa,Participation,MAIN,how-to,Thi quỹ hàng hóa là gì,Step-by-step participation guide
+Điều kiện để tham gia thi quỹ hàng hóa,Participation,MAIN,informational,Thi quỹ hàng hóa là gì,Eligibility and prerequisites
+Cách đánh giá một chương trình thi quỹ hàng hóa,Evaluation,MAIN,how-to,Thi quỹ hàng hóa là gì,Selection framework and checklist
+Ký quỹ hàng hóa phái sinh là gì,Margin,MAIN,definitional,Thi quỹ hàng hóa là gì,Key concept for the project niche
+Mức ký quỹ tối thiểu là bao nhiêu,Margin,MAIN,informational,Ký quỹ hàng hóa phái sinh là gì,Typical margin threshold query
+Cơ chế margin call trong giao dịch hàng hóa,Margin,MAIN,informational,Ký quỹ hàng hóa phái sinh là gì,Risk and account maintenance
+Phí giao dịch hàng hóa phái sinh,Cost,MAIN,informational,Thi quỹ hàng hóa là gì,Fee and cost related query
+Hợp đồng tương lai hàng hóa là gì,Product,MAIN,definitional,Thi quỹ hàng hóa là gì,Product structure foundation
+Hợp đồng kỳ hạn khác gì hợp đồng tương lai,Product,MAIN,comparative,Hợp đồng tương lai hàng hóa là gì,Clarify core contract differences
+Các nhóm hàng hóa phái sinh là gì,Product,MAIN,informational,Hợp đồng tương lai hàng hóa là gì,Macro grouping of commodities
+Nông sản phái sinh gồm những mặt hàng nào,Product,MAIN,informational,Các nhóm hàng hóa phái sinh là gì,Commodity vertical node
+Kim loại phái sinh gồm những mặt hàng nào,Product,MAIN,informational,Các nhóm hàng hóa phái sinh là gì,Commodity vertical node
+Năng lượng phái sinh gồm những mặt hàng nào,Product,MAIN,informational,Các nhóm hàng hóa phái sinh là gì,Commodity vertical node
+Nguyên liệu công nghiệp phái sinh gồm những mặt hàng nào,Product,MAIN,informational,Các nhóm hàng hóa phái sinh là gì,Commodity vertical node
+Bảng giá hàng hóa phái sinh hôm nay,Market Data,MAIN,informational,Thi quỹ hàng hóa là gì,Market monitoring query
+Cách đọc bảng giá hàng hóa phái sinh,Market Data,MAIN,how-to,Bảng giá hàng hóa phái sinh hôm nay,Reading workflow
+Lịch giao dịch hàng hóa phái sinh,Execution,MAIN,informational,Thi quỹ hàng hóa là gì,Trading session and timetable
+Cách mở tài khoản giao dịch hàng hóa phái sinh,Account,MAIN,how-to,Thi quỹ hàng hóa là gì,Account opening workflow
+Thủ tục mở tài khoản hàng hóa phái sinh,Account,MAIN,how-to,Cách mở tài khoản giao dịch hàng hóa phái sinh,Document and approval steps
+Cách nạp tiền vào tài khoản hàng hóa phái sinh,Account,MAIN,how-to,Cách mở tài khoản giao dịch hàng hóa phái sinh,Funding workflow
+Cách rút tiền từ tài khoản hàng hóa phái sinh,Account,MAIN,how-to,Cách mở tài khoản giao dịch hàng hóa phái sinh,Withdrawal workflow
+Cách theo dõi lãi lỗ và ký quỹ,Account,MAIN,how-to,Cách mở tài khoản giao dịch hàng hóa phái sinh,Account control and risk tracking
+Nền tảng giao dịch hàng hóa phái sinh,Platform,MAIN,informational,Thi quỹ hàng hóa là gì,Platform overview
+SACT TradingPro là gì,Platform,MAIN,informational,Nền tảng giao dịch hàng hóa phái sinh,Brand platform node
+CQG là gì trong giao dịch hàng hóa,Platform,MAIN,informational,Nền tảng giao dịch hàng hóa phái sinh,Execution platform node
+Giao dịch hàng hóa phái sinh trên web là gì,Platform,MAIN,informational,Nền tảng giao dịch hàng hóa phái sinh,Web trading node
+Giao dịch hàng hóa phái sinh trên app mobile là gì,Platform,MAIN,informational,Nền tảng giao dịch hàng hóa phái sinh,Mobile trading node
+Quản trị rủi ro trong giao dịch hàng hóa phái sinh,Risk,MAIN,informational,Thi quỹ hàng hóa là gì,Core risk management pillar
+Cách đặt stop loss trong giao dịch hàng hóa,Risk,MAIN,how-to,Quản trị rủi ro trong giao dịch hàng hóa phái sinh,Practical risk control
+Tỷ lệ rủi ro trên mỗi lệnh là bao nhiêu,Risk,MAIN,informational,Quản trị rủi ro trong giao dịch hàng hóa phái sinh,Position sizing query
+Phòng hộ giá là gì,Hedging,MAIN,definitional,Thi quỹ hàng hóa là gì,Commodity hedging definition
+Doanh nghiệp nào nên phòng hộ giá hàng hóa,Hedging,MAIN,informational,Phòng hộ giá là gì,B2B hedging persona
+Chiến lược giao dịch hàng hóa phái sinh,Strategy,MAIN,informational,Thi quỹ hàng hóa là gì,Strategy overview
+Phân tích kỹ thuật hàng hóa phái sinh,Strategy,MAIN,informational,Chiến lược giao dịch hàng hóa phái sinh,Technical analysis node
+Phân tích cơ bản thị trường hàng hóa,Strategy,MAIN,informational,Chiến lược giao dịch hàng hóa phái sinh,Fundamental analysis node
+Tâm lý giao dịch hàng hóa phái sinh,Strategy,MAIN,informational,Chiến lược giao dịch hàng hóa phái sinh,Trader psychology node
+Sai lầm thường gặp khi tham gia thi quỹ hàng hóa,FAQ,SUPP,informational,Thi quỹ hàng hóa là gì,Support and risk education
+Khi nào không nên tham gia thi quỹ hàng hóa,FAQ,SUPP,informational,Thi quỹ hàng hóa là gì,Negative intent guardrail
+Thi quỹ hàng hóa có phù hợp cho người mới không,FAQ,SUPP,informational,Thi quỹ hàng hóa là gì,Beginner fit query
+Thi quỹ hàng hóa có cần kinh nghiệm không,FAQ,SUPP,informational,Thi quỹ hàng hóa là gì,Experience requirement query
+Thi quỹ hàng hóa nên bắt đầu với vốn bao nhiêu,FAQ,SUPP,informational,Thi quỹ hàng hóa là gì,Capital threshold query
+Mẹo chọn chương trình thi quỹ hàng hóa,FAQ,SUPP,informational,Thi quỹ hàng hóa là gì,Program selection support
+Hướng dẫn sử dụng tài khoản demo hàng hóa phái sinh,Support,SUPP,how-to,Cách mở tài khoản giao dịch hàng hóa phái sinh,Onboarding support node
+Cách liên hệ hỗ trợ SACT,Brand Support,SUPP,navigational,Thi quỹ hàng hóa là gì,Brand CTA node

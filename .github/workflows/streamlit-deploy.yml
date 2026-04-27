@@ -1,0 +1,63 @@
+name: Deploy to Streamlit Cloud
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Verify critical files exist
+        run: |
+          echo "=== Checking critical files ==="
+          ls -la app.py
+          ls -la requirements.txt
+          ls -la .streamlit/config.toml || echo "No config.toml"
+          echo "=== Modules ==="
+          ls modules/
+
+      - name: Verify imports work
+        run: |
+          # Phase 35: syntax check + import check in one step (no separate "Run syntax check")
+          echo "=== Syntax check ==="
+          python -m py_compile app.py && echo "  app.py OK"
+          python -m py_compile main_generator.py && echo "  main_generator.py OK"
+          python -m py_compile worker.py && echo "  worker.py OK"
+          python -m py_compile modules/koray_analyzer.py && echo "  koray_analyzer.py OK"
+          python -m py_compile modules/content_brief_builder.py && echo "  content_brief_builder.py OK"
+          python -m py_compile modules/markdown_exporter.py && echo "  markdown_exporter.py OK"
+          python -m py_compile modules/project_manager.py && echo "  project_manager.py OK"
+          python -m py_compile modules/article_writer.py && echo "  article_writer.py OK"
+          python -m py_compile modules/intent.py && echo "  intent.py OK"
+          python -m py_compile modules/llm_utils.py && echo "  llm_utils.py OK"
+          python -m py_compile modules/csv_logger.py && echo "  csv_logger.py OK"
+          python -m py_compile modules/prompts/__init__.py && echo "  prompts/__init__.py OK"
+          python -m py_compile modules/prompts/koray_core_rules.py && echo "  koray_core_rules.py OK"
+          echo "=== Import check ==="
+          python -c "from modules.intent import detect_intent, normalize_intent, get_h2_minimum; print('  intent.py OK')"
+          python -c "from modules.llm_utils import call_llm_with_retry, LLM_DEFAULTS; print('  llm_utils.py OK')"
+          python -c "from modules.prompts.koray_core_rules import KORAY_8_RULES; print('  koray_core_rules.py OK')"
+          echo "All checks passed"

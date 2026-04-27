@@ -1,0 +1,101 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+.playwright-cli/
+*.swp
+*.swo
+*~
+
+# Environment & secrets
+.env
+.env.local
+env_backup.toml
+.streamlit/secrets.toml
+.streamlit/secrets.json
+*.pem
+*.key
+
+# Logs
+*.log
+pipeline_log.txt
+worker_error.log
+test_output.log
+output.log
+err.txt
+error.txt
+out.txt
+test_out.txt
+lint_results.txt
+ast_results.txt
+ruff_errors.txt
+ruff_output.txt
+ruff_out.json
+checklist_out.txt
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+projects.db
+
+# Cache
+.ruff_cache/
+.pytest_cache/
+.ast8n/
+*.cache
+
+# Sensitive files (Google credentials)
+gen-lang-client-*.json
+*.txt (credentials)
+BR_*.txt
+
+# Output files
+output_ui/
+output_ui.zip
+output.json
+scan_result*.json
+scan_result_utf8.json
+job_queue.json
+tmp_live_output_*/
+test_output/
+*.zip
+*.rar
+
+# Claude settings (không cần thiết)
+.agent/
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
